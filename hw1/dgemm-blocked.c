@@ -128,18 +128,18 @@ static void do_block(int lda, int M, int N, int K, double* A, double* B, double*
 					C[lda*j + i] += A[lda*(k + 7) + i] * b8;
 				} while (++i < M);
 			}
-		if (K % 8) {
-			do {
-				b1 = B[j*lda + k];
-				for (i = 0; i < M; ++i) {
-					C[j*lda + i] += A[k*lda + i] * b1;
-				}
-			} while (++k < K);
+			if (K % 8) {
+				do {
+					b1 = B[j*lda + k];
+					for (i = 0; i < M; ++i) {
+						C[j*lda + i] += A[k*lda + i] * b1;
+					}
+				} while (++k < K);
+
+			}
 
 		}
-
 	}
-
 }
 
 /* This routine performs a dgemm operation
