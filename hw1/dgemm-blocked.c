@@ -26,7 +26,7 @@ const char* dgemm_desc = "Simple blocked dgemm.";
  * where C is M-by-N, A is M-by-K, and B is K-by-N. */
 static void do_block(int lda, int M, int N, int K, double* A, double* B, double* C)
 {
-	double b1, b2, b3, b4, b5, b6, b7, b8;
+	double a1, a2, a3, a4, a5, a6, a7, a8;
 	int i, j, k;
 	//Expand j, k, then i. (Maybe have to alter, if this is column major? )
 	for (i = 0; i < M; ++i) {
