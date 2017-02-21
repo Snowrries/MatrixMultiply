@@ -42,7 +42,7 @@ static void do_block(int lda, int M, int N, int K, double* A, double* B, double*
 			b7 = B[ lda*j + k + 6];
 			b8 = B[ lda*j + k + 7];
 
-			for (i = 0; i < M; i += 8) {
+			for (i = 0; i < (M-7); i += 8) {
 				C[lda*j + i] += A[lda*k + i] * b1;
 				C[lda*j + i] += A[lda*(k + 1) + i] * b2;
 				C[lda*j + i] += A[lda*(k + 2) + i] * b3;
