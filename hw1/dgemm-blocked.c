@@ -124,7 +124,7 @@ static void do_block(int lda, int M, int N, int K, double* A, double* B, double*
 
 			}	
 			if(M % 8){
-				for (i = 0; i < M; i ++) {
+				for (; i < M; i ++) {
 					C[lda*j + i] += A[ lda*k+i] * b1;
 					C[lda*j + i] += A[ lda*(k + 1)+i] * b2;
 					C[lda*j + i] += A[ lda*(k + 2)+i] * b3;
