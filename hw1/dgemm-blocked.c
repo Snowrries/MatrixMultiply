@@ -29,119 +29,119 @@ static void do_block(int lda, int M, int N, int K, double* A, double* B, double*
 	double b1, b2, b3, b4, b5, b6, b7, b8;
 	int i, j, k;
 	//Expand j, k, then i. (Maybe have to alter, if this is column major? )
-	for (j = 0; j < N; ++j) {
+	for (i = 0; i < M; ++i) {
 
 		for (k = 0; k < (K - 7); k += 8) {
 
-			b1 = B[ lda*j + k];
-			b2 = B[ lda*j + k + 1];
-			b3 = B[ lda*j + k + 2];
-			b4 = B[ lda*j + k + 3];
-			b5 = B[ lda*j + k + 4];
-			b6 = B[ lda*j + k + 5];
-			b7 = B[ lda*j + k + 6];
-			b8 = B[ lda*j + k + 7];
+			b1 = B[ lda*i + k];
+			b2 = B[ lda*i + k + 1];
+			b3 = B[ lda*i + k + 2];
+			b4 = B[ lda*i + k + 3];
+			b5 = B[ lda*i + k + 4];
+			b6 = B[ lda*i + k + 5];
+			b7 = B[ lda*i + k + 6];
+			b8 = B[ lda*i + k + 7];
 
-			for (i = 0; i < (M - 7); i += 8) {
+			for (j = 0; j < (N - 7); j += 8) {
 
-				C[lda*j + i] += A[ lda*k+i] * b1;
-				C[lda*j + i] += A[ lda*(k + 1)+i] * b2;
-				C[lda*j + i] += A[ lda*(k + 2)+i] * b3;
-				C[lda*j + i] += A[ lda*(k + 3)+i] * b4;
-				C[lda*j + i] += A[ lda*(k + 4)+i] * b5;
-				C[lda*j + i] += A[ lda*(k + 5)+i] * b6;
-				C[lda*j + i] += A[ lda*(k + 6)+i] * b7;
-				C[lda*j + i] += A[ lda*(k + 7)+i] * b8;
+				C[lda*i + j] += A[ lda*k+j] * b1;
+				C[lda*i + j] += A[ lda*(k + 1)+j] * b2;
+				C[lda*i + j] += A[ lda*(k + 2)+j] * b3;
+				C[lda*i + j] += A[ lda*(k + 3)+j] * b4;
+				C[lda*i + j] += A[ lda*(k + 4)+j] * b5;
+				C[lda*i + j] += A[ lda*(k + 5)+j] * b6;
+				C[lda*i + j] += A[ lda*(k + 6)+j] * b7;
+				C[lda*i + j] += A[ lda*(k + 7)+j] * b8;
 
-				C[lda*j + (i+1)] += A[ lda*k+(i+1)] * b1;
-				C[lda*j + (i+1)] += A[ lda*(k + 1)+(i+1)] * b2;
-				C[lda*j + (i+1)] += A[ lda*(k + 2)+(i+1)] * b3;
-				C[lda*j + (i+1)] += A[ lda*(k + 3)+(i+1)] * b4;
-				C[lda*j + (i+1)] += A[ lda*(k + 4)+(i+1)] * b5;
-				C[lda*j + (i+1)] += A[ lda*(k + 5)+(i+1)] * b6;
-				C[lda*j + (i+1)] += A[ lda*(k + 6)+(i+1)] * b7;
-				C[lda*j + (i+1)] += A[ lda*(k + 7)+(i+1)] * b8;
+				C[lda*i + (j+1)] += A[ lda*k+(j+1)] * b1;
+				C[lda*i + (j+1)] += A[ lda*(k + 1)+(j+1)] * b2;
+				C[lda*i + (j+1)] += A[ lda*(k + 2)+(j+1)] * b3;
+				C[lda*i + (j+1)] += A[ lda*(k + 3)+(j+1)] * b4;
+				C[lda*i + (j+1)] += A[ lda*(k + 4)+(j+1)] * b5;
+				C[lda*i + (j+1)] += A[ lda*(k + 5)+(j+1)] * b6;
+				C[lda*i + (j+1)] += A[ lda*(k + 6)+(j+1)] * b7;
+				C[lda*i + (j+1)] += A[ lda*(k + 7)+(j+1)] * b8;
 				
 
-				C[lda*j + (i+2)] += A[ lda*k+(i+2)] * b1;
-				C[lda*j + (i+2)] += A[ lda*(k + 1)+(i+2)] * b2;
-				C[lda*j + (i+2)] += A[ lda*(k + 2)+(i+2)] * b3;
-				C[lda*j + (i+2)] += A[ lda*(k + 3)+(i+2)] * b4;
-				C[lda*j + (i+2)] += A[ lda*(k + 4)+(i+2)] * b5;
-				C[lda*j + (i+2)] += A[ lda*(k + 5)+(i+2)] * b6;
-				C[lda*j + (i+2)] += A[ lda*(k + 6)+(i+2)] * b7;
-				C[lda*j + (i+2)] += A[ lda*(k + 7)+(i+2)] * b8;
+				C[lda*i + (j+2)] += A[ lda*k+(j+2)] * b1;
+				C[lda*i + (j+2)] += A[ lda*(k + 1)+(j+2)] * b2;
+				C[lda*i + (j+2)] += A[ lda*(k + 2)+(j+2)] * b3;
+				C[lda*i + (j+2)] += A[ lda*(k + 3)+(j+2)] * b4;
+				C[lda*i + (j+2)] += A[ lda*(k + 4)+(j+2)] * b5;
+				C[lda*i + (j+2)] += A[ lda*(k + 5)+(j+2)] * b6;
+				C[lda*i + (j+2)] += A[ lda*(k + 6)+(j+2)] * b7;
+				C[lda*i + (j+2)] += A[ lda*(k + 7)+(j+2)] * b8;
 				
 
-				C[lda*j + (i+3)] += A[ lda*k+(i+3)] * b1;
-				C[lda*j + (i+3)] += A[ lda*(k + 1)+(i+3)] * b2;
-				C[lda*j + (i+3)] += A[ lda*(k + 2)+(i+3)] * b3;
-				C[lda*j + (i+3)] += A[ lda*(k + 3)+(i+3)] * b4;
-				C[lda*j + (i+3)] += A[ lda*(k + 4)+(i+3)] * b5;
-				C[lda*j + (i+3)] += A[ lda*(k + 5)+(i+3)] * b6;
-				C[lda*j + (i+3)] += A[ lda*(k + 6)+(i+3)] * b7;
-				C[lda*j + (i+3)] += A[ lda*(k + 7)+(i+3)] * b8;
+				C[lda*i + (j+3)] += A[ lda*k+(j+3)] * b1;
+				C[lda*i + (j+3)] += A[ lda*(k + 1)+(j+3)] * b2;
+				C[lda*i + (j+3)] += A[ lda*(k + 2)+(j+3)] * b3;
+				C[lda*i + (j+3)] += A[ lda*(k + 3)+(j+3)] * b4;
+				C[lda*i + (j+3)] += A[ lda*(k + 4)+(j+3)] * b5;
+				C[lda*i + (j+3)] += A[ lda*(k + 5)+(j+3)] * b6;
+				C[lda*i + (j+3)] += A[ lda*(k + 6)+(j+3)] * b7;
+				C[lda*i + (j+3)] += A[ lda*(k + 7)+(j+3)] * b8;
 				
 
-				C[lda*j + (i+4)] += A[ lda*k+(i+4)] * b1;
-				C[lda*j + (i+4)] += A[ lda*(k + 1)+(i+4)] * b2;
-				C[lda*j + (i+4)] += A[ lda*(k + 2)+(i+4)] * b3;
-				C[lda*j + (i+4)] += A[ lda*(k + 3)+(i+4)] * b4;
-				C[lda*j + (i+4)] += A[ lda*(k + 4)+(i+4)] * b5;
-				C[lda*j + (i+4)] += A[ lda*(k + 5)+(i+4)] * b6;
-				C[lda*j + (i+4)] += A[ lda*(k + 6)+(i+4)] * b7;
-				C[lda*j + (i+4)] += A[ lda*(k + 7)+(i+4)] * b8;
+				C[lda*i + (j+4)] += A[ lda*k+(j+4)] * b1;
+				C[lda*i + (j+4)] += A[ lda*(k + 1)+(j+4)] * b2;
+				C[lda*i + (j+4)] += A[ lda*(k + 2)+(j+4)] * b3;
+				C[lda*i + (j+4)] += A[ lda*(k + 3)+(j+4)] * b4;
+				C[lda*i + (j+4)] += A[ lda*(k + 4)+(j+4)] * b5;
+				C[lda*i + (j+4)] += A[ lda*(k + 5)+(j+4)] * b6;
+				C[lda*i + (j+4)] += A[ lda*(k + 6)+(j+4)] * b7;
+				C[lda*i + (j+4)] += A[ lda*(k + 7)+(j+4)] * b8;
 				
 
-				C[lda*j + (i+5)] += A[ lda*k+(i+5)] * b1;
-				C[lda*j + (i+5)] += A[ lda*(k + 1)+(i+5)] * b2;
-				C[lda*j + (i+5)] += A[ lda*(k + 2)+(i+5)] * b3;
-				C[lda*j + (i+5)] += A[ lda*(k + 3)+(i+5)] * b4;
-				C[lda*j + (i+5)] += A[ lda*(k + 4)+(i+5)] * b5;
-				C[lda*j + (i+5)] += A[ lda*(k + 5)+(i+5)] * b6;
-				C[lda*j + (i+5)] += A[ lda*(k + 6)+(i+5)] * b7;
-				C[lda*j + (i+5)] += A[ lda*(k + 7)+(i+5)] * b8;
+				C[lda*i + (j+5)] += A[ lda*k+(j+5)] * b1;
+				C[lda*i + (j+5)] += A[ lda*(k + 1)+(j+5)] * b2;
+				C[lda*i + (j+5)] += A[ lda*(k + 2)+(j+5)] * b3;
+				C[lda*i + (j+5)] += A[ lda*(k + 3)+(j+5)] * b4;
+				C[lda*i + (j+5)] += A[ lda*(k + 4)+(j+5)] * b5;
+				C[lda*i + (j+5)] += A[ lda*(k + 5)+(j+5)] * b6;
+				C[lda*i + (j+5)] += A[ lda*(k + 6)+(j+5)] * b7;
+				C[lda*i + (j+5)] += A[ lda*(k + 7)+(j+5)] * b8;
 				
 
-				C[lda*j + (i+6)] += A[ lda*k+(i+6)] * b1;
-				C[lda*j + (i+6)] += A[ lda*(k + 1)+(i+6)] * b2;
-				C[lda*j + (i+6)] += A[ lda*(k + 2)+(i+6)] * b3;
-				C[lda*j + (i+6)] += A[ lda*(k + 3)+(i+6)] * b4;
-				C[lda*j + (i+6)] += A[ lda*(k + 4)+(i+6)] * b5;
-				C[lda*j + (i+6)] += A[ lda*(k + 5)+(i+6)] * b6;
-				C[lda*j + (i+6)] += A[ lda*(k + 6)+(i+6)] * b7;
-				C[lda*j + (i+6)] += A[ lda*(k + 7)+(i+6)] * b8;
+				C[lda*i + (j+6)] += A[ lda*k+(j+6)] * b1;
+				C[lda*i + (j+6)] += A[ lda*(k + 1)+(j+6)] * b2;
+				C[lda*i + (j+6)] += A[ lda*(k + 2)+(j+6)] * b3;
+				C[lda*i + (j+6)] += A[ lda*(k + 3)+(j+6)] * b4;
+				C[lda*i + (j+6)] += A[ lda*(k + 4)+(j+6)] * b5;
+				C[lda*i + (j+6)] += A[ lda*(k + 5)+(j+6)] * b6;
+				C[lda*i + (j+6)] += A[ lda*(k + 6)+(j+6)] * b7;
+				C[lda*i + (j+6)] += A[ lda*(k + 7)+(j+6)] * b8;
 				
 
-				C[lda*j + (i+7)] += A[ lda*k+(i+7)] * b1;
-				C[lda*j + (i+7)] += A[ lda*(k + 1)+(i+7)] * b2;
-				C[lda*j + (i+7)] += A[ lda*(k + 2)+(i+7)] * b3;
-				C[lda*j + (i+7)] += A[ lda*(k + 3)+(i+7)] * b4;
-				C[lda*j + (i+7)] += A[ lda*(k + 4)+(i+7)] * b5;
-				C[lda*j + (i+7)] += A[ lda*(k + 5)+(i+7)] * b6;
-				C[lda*j + (i+7)] += A[ lda*(k + 6)+(i+7)] * b7;
-				C[lda*j + (i+7)] += A[ lda*(k + 7)+(i+7)] * b8;
+				C[lda*i + (j+7)] += A[ lda*k+(j+7)] * b1;
+				C[lda*i + (j+7)] += A[ lda*(k + 1)+(j+7)] * b2;
+				C[lda*i + (j+7)] += A[ lda*(k + 2)+(j+7)] * b3;
+				C[lda*i + (j+7)] += A[ lda*(k + 3)+(j+7)] * b4;
+				C[lda*i + (j+7)] += A[ lda*(k + 4)+(j+7)] * b5;
+				C[lda*i + (j+7)] += A[ lda*(k + 5)+(j+7)] * b6;
+				C[lda*i + (j+7)] += A[ lda*(k + 6)+(j+7)] * b7;
+				C[lda*i + (j+7)] += A[ lda*(k + 7)+(j+7)] * b8;
 
 			}	
-			if(M % 8){
-				for (; i < M; i ++) {
-					C[lda*j + i] += A[ lda*k+i] * b1;
-					C[lda*j + i] += A[ lda*(k + 1)+i] * b2;
-					C[lda*j + i] += A[ lda*(k + 2)+i] * b3;
-					C[lda*j + i] += A[ lda*(k + 3)+i] * b4;
-					C[lda*j + i] += A[ lda*(k + 4)+i] * b5;
-					C[lda*j + i] += A[ lda*(k + 5)+i] * b6;
-					C[lda*j + i] += A[ lda*(k + 6)+i] * b7;
-					C[lda*j + i] += A[ lda*(k + 7)+i] * b8;
+			if(N % 8){
+				for (; j < N; j ++) {
+					C[lda*i + j] += A[ lda*k+j] * b1;
+					C[lda*i + j] += A[ lda*(k + 1)+j] * b2;
+					C[lda*i + j] += A[ lda*(k + 2)+j] * b3;
+					C[lda*i + j] += A[ lda*(k + 3)+j] * b4;
+					C[lda*i + j] += A[ lda*(k + 4)+j] * b5;
+					C[lda*i + j] += A[ lda*(k + 5)+j] * b6;
+					C[lda*i + j] += A[ lda*(k + 6)+j] * b7;
+					C[lda*i + j] += A[ lda*(k + 7)+j] * b8;
 				}
 			}
 		}
 		if (K % 8) {
 			do {
 				b1 = B[j*lda + k];
-				for (i = 0; i < M; ++i) {
+				for (j = 0; j < N; ++j) {
 
-					C[lda*j + i] += A[k*lda + i] * b1;
+					C[lda*i + j] += A[k*lda + j] * b1;
 				}
 			} while (++k < K);
 		}
@@ -167,6 +167,6 @@ void square_dgemm(int lda, double* A, double* B, double* C)
 				int K = min(BLOCK_SIZE, lda - k);
 
 				/* Perform individual block dgemm */
-				do_block(lda, M, N, K, A + i + k*lda, B + k + j*lda, C + i + j*lda);
+				do_block(lda, M, N, K, A + j + k*lda, B + k + j*lda, C + j + j*lda);
 			}
 }
