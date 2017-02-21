@@ -128,26 +128,37 @@ static void do_block(int lda, int M, int N, int K, double* A, double* B, double*
 				}
 			if (M % 8) {
 				do {
-					C[lda*j + i] += A[lda*k + i] * b1;
-					C[lda*j + i] += A[lda*(k + 1) + i] * b2;
-					C[lda*j + i] += A[lda*(k + 2) + i] * b3;
-					C[lda*j + i] += A[lda*(k + 3) + i] * b4;
-					C[lda*j + i] += A[lda*(k + 4) + i] * b5;
-					C[lda*j + i] += A[lda*(k + 5) + i] * b6;
-					C[lda*j + i] += A[lda*(k + 6) + i] * b7;
-					C[lda*j + i] += A[lda*(k + 7) + i] * b8;
+					C[lda*j + i] += A[k1 + i] * b1;
+					C[lda*j + i] += A[k2 + i] * b2;
+					C[lda*j + i] += A[k3 + i] * b3;
+					C[lda*j + i] += A[k4 + i] * b4;
+					C[lda*j + i] += A[k5 + i] * b5;
+					C[lda*j + i] += A[k6 + i] * b6;
+					C[lda*j + i] += A[k7 + i] * b7;
+					C[lda*j + i] += A[k8 + i] * b8;
 				} while (++i < M);
 			}
-			if (K % 8) {
-				do {
-					b1 = B[j*lda + k];
-					for (i = 0; i < M; ++i) {
-						C[j*lda + i] += A[k*lda + i] * b1;
-					}
-				} while (++k < K);
+		}
+		if (K % 8) {
+			do {
+				b1 = B[j*lda + k];
+				for (i = 0; i < (M-7); i += 8) {
 
-			}
-
+					C[lda*j + i] += A[k1 + i] * b1;
+					C[lda*j + (i + 1)] += A[lda*k + (i + 1)] * b1;
+					C[lda*j + (i + 2)] += A[lda*k + (i + 2)] * b1;
+					C[lda*j + (i + 3)] += A[lda*k + (i + 3)] * b1;
+					C[lda*j + (i + 4)] += A[lda*k + (i + 4)] * b1;
+					C[lda*j + (i + 5)] += A[lda*k + (i + 5)] * b1;
+					C[lda*j + (i + 6)] += A[lda*k + (i + 6)] * b1;
+					C[lda*j + (i + 7)] += A[lda*k + (i + 7)] * b1;
+				}
+				if (M % 8) {
+					do {
+						C[lda*j + i] += A[lda*k + i] * b1;
+					} while (++i < M);
+				}
+			} while (++k < K);
 		}
 	}
 }
