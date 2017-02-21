@@ -44,14 +44,14 @@ static void do_block(int lda, int M, int N, int K, double* A, double* B, double*
 
 			for (i = 0; i < M; ++i) {
 
-				C[lda*j + i] += A[ lda*i +k] * b1;
-				C[lda*j + i] += A[ lda*i +(k + 1)] * b2;
-				C[lda*j + i] += A[ lda*i +(k + 2)] * b3;
-				C[lda*j + i] += A[ lda*i +(k + 3)] * b4;
-				C[lda*j + i] += A[ lda*i +(k + 4)] * b5;
-				C[lda*j + i] += A[ lda*i +(k + 5)] * b6;
-				C[lda*j + i] += A[ lda*i +(k + 6)] * b7;
-				C[lda*j + i] += A[ lda*i +(k + 7)] * b8;
+				C[lda*j + i] += A[ lda*k+i] * b1;
+				C[lda*j + i] += A[ lda*(k + 1)+i] * b2;
+				C[lda*j + i] += A[ lda*(k + 2)+i] * b3;
+				C[lda*j + i] += A[ lda*(k + 3)+i] * b4;
+				C[lda*j + i] += A[ lda*(k + 4)+i] * b5;
+				C[lda*j + i] += A[ lda*(k + 5)+i] * b6;
+				C[lda*j + i] += A[ lda*(k + 6)+i] * b7;
+				C[lda*j + i] += A[ lda*(k + 7)+i] * b8;
 			}	
 		}
 		if (K % 8) {
