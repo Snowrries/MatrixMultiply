@@ -27,7 +27,7 @@ const char* dgemm_desc = "Simple blocked dgemm.";
 static void do_block(int lda, int M, int N, int K, double* A, double* B, double* C)
 {
 	double b1, b2, b3, b4, b5, b6, b7, b8;
-	double k1,k2,k3,k4,k5,k6,k7,k8;
+	int k1,k2,k3,k4,k5,k6,k7,k8;
 	int i, j, k;
 	//Expand j, k, then i. (Maybe have to alter, if this is column major? )
 	for (j = 0; j < N; ++j) {
@@ -53,7 +53,7 @@ static void do_block(int lda, int M, int N, int K, double* A, double* B, double*
 				k6 = lda*(k + 5);
 				k7 = lda*(k + 6);
 				k8 = lda*(k + 7);
-				
+
 				C[lda*j + i] += A[k1 + i] * b1;
 				C[lda*j + i] += A[k2 + i] * b2;
 				C[lda*j + i] += A[k3 + i] * b3;
