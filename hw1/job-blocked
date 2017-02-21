@@ -3,7 +3,7 @@
 #SBATCH -p normal
 #SBATCH -t 00:01:00 
 #SBATCH -J Blas_job 
-#SBATCH -o output/Blocked.%j.out
-#SBATCH -e output/Blocked.%j.err
+#SBATCH -o Output.out
+#SBATCH -e Error.err
 
 ./benchmark-blocked
