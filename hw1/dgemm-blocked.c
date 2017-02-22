@@ -67,15 +67,15 @@ static void do_block(int lda, int M, int N, int K, double* A, double* B, double*
 		}
 		if (K % 4) {
 			do {
-				bb1 = B[j*lda + k];
+				b1 = _mm256_broadcast_sd (&B[ lda*j + k]);
 				for (i = 0; i < (M - 3); i += 4) {
-					C[lda*j + i] += A[lda*k + i] * bb1;
-					C[lda*j + (i+1)] += A[lda*k + (i+1)] * bb1;
-					C[lda*j + (i+2)] += A[lda*k + (i+2)] * bb1;
-					C[lda*j + (i+3)] += A[lda*k + (i+3)] * bb1;
+					c = _mm256_loadu_pd(&C[lda*j + i]);
+					c = _mm256_add_pd(c, _mm256_mul_pd(_mm256_loadu_pd(&A[lda*k + i]), b1));
+					_mm256_storeu_pd(&C[lda*j + i],c);
 				}
 				if(M % 4){
-					for (; i < M; i ++) {				
+					bb1 = B[j*lda + k];
+					for (; i < M; ++i) {				
 						C[lda*j + i] += A[lda*k + i] * bb1;
 					}
 				}
