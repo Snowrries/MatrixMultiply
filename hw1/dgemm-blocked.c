@@ -223,10 +223,6 @@ static void do_block(int lda, int M, int N, int K, double* A, double* B, double*
 					bb2 = B[temp + lda];
 					bb3 = B[temp + 2*lda];
 					bb4 = B[temp + 3*lda];
-					bb3 = B[temp + 4*lda];
-					bb4 = B[temp + 5*lda];
-					bb3 = B[temp + 6*lda];
-					bb4 = B[temp + 7*lda];
 					for (; i < M; ++i) {
 						temp = lda*k+i;
 						double at = A[temp];
