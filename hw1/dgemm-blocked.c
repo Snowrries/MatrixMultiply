@@ -42,7 +42,7 @@ static void do_block(int lda, int M, int N, int K, double* A, double* B, double*
 				c = _mm256_add_pd(_mm256_mul_pd(_mm256_load_pd(&A[lda*k + i]),b),c);
 				c = _mm256_add_pd(_mm256_mul_pd(_mm256_load_pd(&A[lda*(k+1) + i]),b),c);
 				c = _mm256_add_pd(_mm256_mul_pd(_mm256_load_pd(&A[lda*(k+2) + i]),b),c);
-				_mm256_store_pd(&C[lda*j + i],_mm256_add_pd(_mm256_mul_pd(_mm256_load_pd(&A[lda*(k+3) + i]),b),tt));
+				_mm256_store_pd(&C[lda*j + i],_mm256_add_pd(_mm256_mul_pd(_mm256_load_pd(&A[lda*(k+3) + i]),b),c));
 
 			}	
 			if(M % 4){
