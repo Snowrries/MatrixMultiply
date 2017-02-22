@@ -30,7 +30,7 @@ static void do_block(int lda, int M, int N, int K, double* A, double* B, double*
 	__m256d b1, b2, b3, b4, c;
 	int i, j, k;
 	//Expand j, k, then i. (Maybe have to alter, if this is column major? )
-	for (i = 0; i < M; ++i) {
+	for (j = 0; j < N; ++j) {
 
 		for (k = 0; k < (K - 3); k += 4) {
 
@@ -103,6 +103,6 @@ void square_dgemm(int lda, double* A, double* B, double* C)
 				int K = min(BLOCK_SIZE, lda - k);
 
 				/* Perform individual block dgemm */
-				do_block(lda, M, N, K, A + j + k*lda, B + k + j*lda, C + j + j*lda);
+				do_block(lda, M, N, K, A + i + k*lda, B + k + j*lda, C + i + j*lda);
 			}
 }
