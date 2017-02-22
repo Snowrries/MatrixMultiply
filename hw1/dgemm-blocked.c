@@ -27,8 +27,7 @@ const char* dgemm_desc = "Simple blocked dgemm.";
 static void do_block(int lda, int M, int N, int K, double* A, double* B, double* C)
 {
 	double b1;
-	__m256d b, c, temp1, temp2, temp3, temp4, temp5, tempx;
-	__m256d a1,a2,a3,a4;
+	__m256d b, c;
 	int i, j, k;
 	//Expand j, k, then i. (Maybe have to alter, if this is column major? )
 	for (j = 0; j < N; ++j) {
@@ -40,28 +39,22 @@ static void do_block(int lda, int M, int N, int K, double* A, double* B, double*
 
 			for (i = 0; i < (M - 3); i += 4) {
 				c = _mm256_load_pd(&C[lda*j + i]);
-				a1 = _mm256_load_pd(&A[lda*k + i]);
-				a2 = _mm256_load_pd(&A[lda*(k+1) + i]);
-				a3 = _mm256_load_pd(&A[lda*(k+2) + i]);
-				a4 = _mm256_load_pd(&A[lda*(k+3) + i]);
-				temp1 = _mm256_mul_pd(a1,b);
-				temp2 = _mm256_mul_pd(a2,b);
-				temp3 = _mm256_add_pd(temp1,temp2);
 
-				temp1 = _mm256_mul_pd(a3,b);
-				temp2 = _mm256_mul_pd(a4,b);
-				temp4 = _mm256_add_pd(temp1,temp2);
-				temp5 = _mm256_add_pd(temp3,temp4);
-				tempx = _mm256_add_pd(temp5,c);
+				c = _mm256_add_pd(c, _mm256_mul_pd(_mm256_load_pd(&A[lda*k + i]), b));
 
+				c = _mm256_add_pd(c, _mm256_mul_pd(_mm256_load_pd(&A[lda*(k + 1) + i]), b));
 
-				_mm256_store_pd(&C[lda*j + i],tempx);
+				c = _mm256_add_pd(c, _mm256_mul_pd(_mm256_load_pd(&A[lda*(k + 2) + i]), b));
+
+				c = _mm256_add_pd(c, _mm256_mul_pd(_mm256_load_pd(&A[lda*(k + 3) + i]), b));
+
+				_mm256_store_pd(&C[lda*j + i],c);
 
 			}	
 			if(M % 4){
 				b1 = B[j*lda + k];
 				for (; i < M; ++i) {				
-					C[lda*j + i] = A[lda*k + i] * b1;
+					C[lda*j + i] += A[lda*k + i] * b1;
 				}
 			}
 		}
@@ -69,14 +62,14 @@ static void do_block(int lda, int M, int N, int K, double* A, double* B, double*
 			do {
 				b1 = B[j*lda + k];
 				for (i = 0; i < (M - 3); i += 4) {
-					C[lda*j + i] = A[lda*k + i] * b1;
-					C[lda*j + (i+1)] = A[lda*k + (i+1)] * b1;
-					C[lda*j + (i+2)] = A[lda*k + (i+2)] * b1;
-					C[lda*j + (i+3)] = A[lda*k + (i+3)] * b1;
+					C[lda*j + i] += A[lda*k + i] * b1;
+					C[lda*j + (i+1)] += A[lda*k + (i+1)] * b1;
+					C[lda*j + (i+2)] += A[lda*k + (i+2)] * b1;
+					C[lda*j + (i+3)] += A[lda*k + (i+3)] * b1;
 				}
 				if(M % 4){
 					for (; i < M; i ++) {				
-						C[lda*j + i] = A[lda*k + i] * b1;
+						C[lda*j + i] += A[lda*k + i] * b1;
 					}
 				}
 			} while (++k < K);
