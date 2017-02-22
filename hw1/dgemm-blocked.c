@@ -29,12 +29,12 @@ static void do_block (int lda, int M, int N, int K, double* A, double* B, double
     for (int j = 0; j < N; ++j) 
     {
       for (int k = 0; k < K; ++k)
-        restrict double b1 = B[k+j*lda];
+        double restrict b1 = B[k+j*lda];
         int jl = j*lda;
         int kl = k*lda;
         for (int i = 0; i < M; ++i)
           {
-            restrict C[i+jl] += A[i+kl] * b1; 
+            C[i+jl] += A[i+kl] * b1; 
           }
     }
 }
