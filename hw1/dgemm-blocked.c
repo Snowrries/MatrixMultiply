@@ -39,42 +39,16 @@ static void do_block(int lda, int M, int N, int K, double* A, double* B, double*
 
 			for (i = 0; i < (M - 3); i += 4) {
 				c = _mm256_load_pd(&C[lda*j + i]);
-				_mm256_store_pd(&C[lda*j + i],_mm256_add_pd(_mm256_mul_pd(_mm256_load_pd(&A[lda*k + i]),b),c));
-				_mm256_store_pd(&C[lda*j + i],_mm256_add_pd(_mm256_mul_pd(_mm256_load_pd(&A[lda*(k+1) + i]),b),c));
-				_mm256_store_pd(&C[lda*j + i],_mm256_add_pd(_mm256_mul_pd(_mm256_load_pd(&A[lda*(k+2) + i]),b),c));
-				_mm256_store_pd(&C[lda*j + i],_mm256_add_pd(_mm256_mul_pd(_mm256_load_pd(&A[lda*(k+3) + i]),b),c));
-
-				c = _mm256_load_pd(&C[lda*j + (i+1)]);
-				_mm256_store_pd(&C[lda*j + (i+1)],_mm256_add_pd(_mm256_mul_pd(_mm256_load_pd(&A[lda*k + (i+1)]),b),c));
-				_mm256_store_pd(&C[lda*j + (i+1)],_mm256_add_pd(_mm256_mul_pd(_mm256_load_pd(&A[lda*(k+1) + (i+1)]),b),c));
-				_mm256_store_pd(&C[lda*j + (i+1)],_mm256_add_pd(_mm256_mul_pd(_mm256_load_pd(&A[lda*(k+2) + (i+1)]),b),c));
-				_mm256_store_pd(&C[lda*j + (i+1)],_mm256_add_pd(_mm256_mul_pd(_mm256_load_pd(&A[lda*(k+3) + (i+1)]),b),c));
-
-
-				c = _mm256_load_pd(&C[lda*j + (i+2)]);
-				_mm256_store_pd(&C[lda*j + (i+2)],_mm256_add_pd(_mm256_mul_pd(_mm256_load_pd(&A[lda*k + (i+2)]),b),c));
-				_mm256_store_pd(&C[lda*j + (i+2)],_mm256_add_pd(_mm256_mul_pd(_mm256_load_pd(&A[lda*(k+1) + (i+2)]),b),c));
-				_mm256_store_pd(&C[lda*j + (i+2)],_mm256_add_pd(_mm256_mul_pd(_mm256_load_pd(&A[lda*(k+2) + (i+2)]),b),c));
-				_mm256_store_pd(&C[lda*j + (i+2)],_mm256_add_pd(_mm256_mul_pd(_mm256_load_pd(&A[lda*(k+3) + (i+2)]),b),c));
-
-
-				c = _mm256_load_pd(&C[lda*j + (i+3)]);
-				_mm256_store_pd(&C[lda*j + (i+3)],_mm256_add_pd(_mm256_mul_pd(_mm256_load_pd(&A[lda*k + (i+3)]),b),c));
-				_mm256_store_pd(&C[lda*j + (i+3)],_mm256_add_pd(_mm256_mul_pd(_mm256_load_pd(&A[lda*(k+1) + (i+3)]),b),c));
-				_mm256_store_pd(&C[lda*j + (i+3)],_mm256_add_pd(_mm256_mul_pd(_mm256_load_pd(&A[lda*(k+2) + (i+3)]),b),c));
-				_mm256_store_pd(&C[lda*j + (i+3)],_mm256_add_pd(_mm256_mul_pd(_mm256_load_pd(&A[lda*(k+3) + (i+3)]),b),c));
-
-
+				c = _mm256_add_pd(_mm256_mul_pd(_mm256_load_pd(&A[lda*k + i]),b),c);
+				c = _mm256_add_pd(_mm256_mul_pd(_mm256_load_pd(&A[lda*(k+1) + i]),b),c);
+				c = _mm256_add_pd(_mm256_mul_pd(_mm256_load_pd(&A[lda*(k+2) + i]),b),c);
+				_mm256_store_pd(&C[lda*j + i],_mm256_add_pd(_mm256_mul_pd(_mm256_load_pd(&A[lda*(k+3) + i]),b),tt));
 
 			}	
 			if(M % 4){
-				b = _mm256_load_pd (&B[ lda*i + k]);
+				b1 = B[j*lda + k];
 				for (; i < M; i ++) {				
-					c = _mm256_load_pd(&C[lda*j + i]);
-					_mm256_store_pd(&C[lda*j + i],_mm256_add_pd(_mm256_mul_pd(_mm256_load_pd(&A[lda*k + i]),b),c));
-					_mm256_store_pd(&C[lda*j + i],_mm256_add_pd(_mm256_mul_pd(_mm256_load_pd(&A[lda*(k+1) + i]),b),c));
-					_mm256_store_pd(&C[lda*j + i],_mm256_add_pd(_mm256_mul_pd(_mm256_load_pd(&A[lda*(k+2) + i]),b),c));
-					_mm256_store_pd(&C[lda*j + i],_mm256_add_pd(_mm256_mul_pd(_mm256_load_pd(&A[lda*(k+3) + i]),b),c));
+					C[lda*j + i] = A[lda*k + i] * b1;
 				}
 			}
 		}
