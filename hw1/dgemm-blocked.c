@@ -26,10 +26,10 @@ const char* dgemm_desc = "Simple blocked dgemm.";
  * where C is M-by-N, A is M-by-K, and B is K-by-N. */
 static void do_block(int lda, int M, int N, int K, double* A, double* B, double* C)
 {
-	double bb1, bb2, bb3, bb4, bb5, bb6, bb7, bb8, bb9, bb10, bb11, bb12, bb13, bb14, bb15;
+	double bb1, bb2, bb3, bb4, bb5, bb6, bb7, bb8, bb9, bb10, bb11, bb12, bb13, bb14, bb15, bb16;
 	int temp;
 	__m256d b1, b2, b3, b4, c, temp1, temp2, temp3, temp4, temp5, temp6;
-	__m256d b5, b6, b7, b8, b9, b10, b11, b12, b13, b14, b14, b15;
+	__m256d b5, b6, b7, b8, b9, b10, b11, b12, b13, b14, b15, b16;
 	int i, j, k;
 	//Expand j, k, then i. (Maybe have to alter, if this is column major? )
 	for (j = 0; j < N-3 ; j+=4 ) {
