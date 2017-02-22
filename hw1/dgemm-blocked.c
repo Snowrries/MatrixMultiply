@@ -27,7 +27,7 @@ const char* dgemm_desc = "Simple blocked dgemm.";
 static void do_block(int lda, int M, int N, int K, double* A, double* B, double* C)
 {
 	double b1;
-	__m256d b, c;
+	__m256d b, c, temp1, temp2, temp3, temp4, temp5, temp6, tempx;
 	int i, j, k;
 	//Expand j, k, then i. (Maybe have to alter, if this is column major? )
 	for (j = 0; j < N; ++j) {
@@ -39,10 +39,16 @@ static void do_block(int lda, int M, int N, int K, double* A, double* B, double*
 
 			for (i = 0; i < (M - 3); i += 4) {
 				c = _mm256_load_pd(&C[lda*j + i]);
-				c = _mm256_add_pd(_mm256_mul_pd(_mm256_load_pd(&A[lda*k + i]),b),c);
-				c = _mm256_add_pd(_mm256_mul_pd(_mm256_load_pd(&A[lda*(k+1) + i]),b),c);
-				c = _mm256_add_pd(_mm256_mul_pd(_mm256_load_pd(&A[lda*(k+2) + i]),b),c);
-				_mm256_store_pd(&C[lda*j + i],_mm256_add_pd(_mm256_mul_pd(_mm256_load_pd(&A[lda*(k+3) + i]),b),c));
+				temp1 = _mm256_mul_pd(_mm256_load_pd(&A[lda*k + i]),b);
+				temp2 = _mm256_mul_pd(_mm256_load_pd(&A[lda*(k+1) + i]),b);
+				temp5 = _mm256_add_pd(temp1,temp2);
+				
+				temp3 = _mm256_mul_pd(_mm256_load_pd(&A[lda*(k+2) + i]),b);
+				temp4 = _mm256_mul_pd(_mm256_load_pd(&A[lda*(k+3) + i]),b);
+				temp6 = _mm256_add_pd(temp3,temp4);
+				tempx = _mm256_add_pd(temp5,temp6);
+
+				_mm256_store_pd(&C[lda*j + i],_mm256_add_pd(tempx,c));
 
 			}	
 			if(M % 4){
