@@ -28,7 +28,7 @@ static void do_block (int lda, int M, int N, int K, double* A, double* B, double
 {
     for (int j = 0; j < N; ++j) 
     {
-      for (int k = 0; k < K; ++k)
+      for (int k = 0; k < K; ++k){
         double b1 = B[k+j*lda];
         int jl = j*lda;
         int kl = k*lda;
@@ -36,6 +36,7 @@ static void do_block (int lda, int M, int N, int K, double* A, double* B, double
           {
             C[i+jl] += A[i+kl] * b1; 
           }
+      }
     }
 }
 
