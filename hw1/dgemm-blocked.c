@@ -72,7 +72,7 @@ static void do_block(int lda, int M, int N, int K, double* A, double* B, double*
 				c = _mm256_add_pd(c, temp5);
 				c = _mm256_add_pd(c, temp6);
 
-				_mm256_storeu_pd(&C[lda*j + i],c);
+				_mm256_store_pd(&C[lda*j + i],c);
 
 				c = _mm256_load_pd(&C[lda*(j+1) + i]);
 				temp1 = _mm256_mul_pd(_mm256_load_pd(&A[t1]), b5);
@@ -86,7 +86,7 @@ static void do_block(int lda, int M, int N, int K, double* A, double* B, double*
 				c = _mm256_add_pd(c, temp5);
 				c = _mm256_add_pd(c, temp6);
 
-				_mm256_storeu_pd(&C[lda*(j+1) + i],c);
+				_mm256_store_pd(&C[lda*(j+1) + i],c);
 
 				c = _mm256_load_pd(&C[lda*(j+2) + i]);
 				temp1 = _mm256_mul_pd(_mm256_load_pd(&A[t1]), b9);
@@ -100,7 +100,7 @@ static void do_block(int lda, int M, int N, int K, double* A, double* B, double*
 				c = _mm256_add_pd(c, temp5);
 				c = _mm256_add_pd(c, temp6);
 
-				_mm256_storeu_pd(&C[lda*(j+2) + i],c);
+				_mm256_store_pd(&C[lda*(j+2) + i],c);
 
 				c = _mm256_load_pd(&C[lda*(j+3) + i]);
 				temp1 = _mm256_mul_pd(_mm256_load_pd(&A[t1]), b13);
@@ -114,7 +114,7 @@ static void do_block(int lda, int M, int N, int K, double* A, double* B, double*
 				c = _mm256_add_pd(c, temp5);
 				c = _mm256_add_pd(c, temp6);
 
-				_mm256_storeu_pd(&C[lda*(j+3) + i],c);
+				_mm256_store_pd(&C[lda*(j+3) + i],c);
 
 			}	
 			if(M % 4){
@@ -171,36 +171,62 @@ static void do_block(int lda, int M, int N, int K, double* A, double* B, double*
 				b3 = _mm256_broadcast_sd (&B[ temp+(2*lda)]);
 				b4 = _mm256_broadcast_sd (&B[ temp+(3*lda)]);
 
-				for (i = 0; i < (M - 3); i += 4) {
+				for (i = 0; i < (M - 7); i += 8) {
 					c = _mm256_load_pd(&C[lda*j + i]);
 					temp = lda*k+i;
 					double* atp = &A[temp];
 					temp1 = _mm256_mul_pd(_mm256_load_pd(atp),b1);
 					c = _mm256_add_pd(c, temp1);
-					_mm256_storeu_pd(&C[lda*j + i],c);
+					_mm256_store_pd(&C[lda*j + i],c);
+
+					c = _mm256_load_pd(&C[lda*j + i+4]);
+					int templus4 = temp+4;
+					double* atp4 = &A[templus4];
+					temp1 = _mm256_mul_pd(_mm256_load_pd(atp4),b1);
+					c = _mm256_add_pd(c, temp1);
+					_mm256_store_pd(&C[lda*j + i+4],c);
 
 					c = _mm256_load_pd(&C[lda*(j+1) + i]);
 					temp1 = _mm256_mul_pd(_mm256_load_pd(atp),b2);
 					c = _mm256_add_pd(c, temp1);
-					_mm256_storeu_pd(&C[lda*(j+1) + i],c);
+					_mm256_store_pd(&C[lda*(j+1) + i],c);
+
+					c = _mm256_load_pd(&C[lda*(j+1) + i+4]);
+					temp1 = _mm256_mul_pd(_mm256_load_pd(atp4),b2);
+					c = _mm256_add_pd(c, temp1);
+					_mm256_store_pd(&C[lda*(j+1) + i+4],c);
 
 					c = _mm256_load_pd(&C[lda*(j+2) + i]);
 					temp1 = _mm256_mul_pd(_mm256_load_pd(atp),b3);
 					c = _mm256_add_pd(c, temp1);
-					_mm256_storeu_pd(&C[lda*(j+2) + i],c);
+					_mm256_store_pd(&C[lda*(j+2) + i],c);
+
+					c = _mm256_load_pd(&C[lda*(j+2) + i+4]);
+					temp1 = _mm256_mul_pd(_mm256_load_pd(atp4),b3);
+					c = _mm256_add_pd(c, temp1);
+					_mm256_store_pd(&C[lda*(j+2) + i+4],c);
 
 					c = _mm256_load_pd(&C[lda*(j+3) + i]);
 					temp1 = _mm256_mul_pd(_mm256_load_pd(atp),b4);
 					c = _mm256_add_pd(c, temp1);
-					_mm256_storeu_pd(&C[lda*(j+3) + i],c);
+					_mm256_store_pd(&C[lda*(j+3) + i],c);
+
+					c = _mm256_load_pd(&C[lda*(j+3) + i+4]);
+					temp1 = _mm256_mul_pd(_mm256_load_pd(atp4),b4);
+					c = _mm256_add_pd(c, temp1);
+					_mm256_store_pd(&C[lda*(j+3) + i+4],c);
 
 				}	
-				if(M % 4){
+				if(M % 8){
 					temp = j*lda+k;
 					bb1 = B[temp];
 					bb2 = B[temp + lda];
 					bb3 = B[temp + 2*lda];
 					bb4 = B[temp + 3*lda];
+					bb3 = B[temp + 4*lda];
+					bb4 = B[temp + 5*lda];
+					bb3 = B[temp + 6*lda];
+					bb4 = B[temp + 7*lda];
 					for (; i < M; ++i) {
 						temp = lda*k+i;
 						double at = A[temp];
@@ -238,7 +264,7 @@ static void do_block(int lda, int M, int N, int K, double* A, double* B, double*
 
 					c = _mm256_add_pd(c, temp6);
 
-					_mm256_storeu_pd(&C[lda*j + i],c);
+					_mm256_store_pd(&C[lda*j + i],c);
 
 				}	
 				if(M % 4){
@@ -262,7 +288,7 @@ static void do_block(int lda, int M, int N, int K, double* A, double* B, double*
 					for (i = 0; i < (M - 3); i += 4) {
 						c = _mm256_load_pd(&C[lda*j + i]);
 						c = _mm256_add_pd(c, _mm256_mul_pd(_mm256_load_pd(&A[lda*k + i]), b1));
-						_mm256_storeu_pd(&C[lda*j + i],c);
+						_mm256_store_pd(&C[lda*j + i],c);
 					}
 					if(M % 4){
 						bb1 = B[j*lda + k];
