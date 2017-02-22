@@ -16,7 +16,7 @@ LDLIBS = -lrt -Wl,--start-group $(MKLROOT)/lib/intel64/libmkl_intel_lp64.a $(MKL
 const char* dgemm_desc = "Simple blocked dgemm.";
 
 #if !defined(BLOCK_SIZE)
-#define BLOCK_SIZE 41
+#define BLOCK_SIZE 64
 #endif
 
 #define min(a,b) (((a)<(b))?(a):(b))
@@ -26,16 +26,16 @@ const char* dgemm_desc = "Simple blocked dgemm.";
  * where C is M-by-N, A is M-by-K, and B is K-by-N. */
 static void do_block (int lda, int M, int N, int K, double* A, double* B, double* C)
 {
-  /* For each row i of A */
-  for (int i = 0; i < M; ++i)
-    /* For each column j of B */ 
     for (int j = 0; j < N; ++j) 
     {
-      /* Compute C(i,j) */
-      double cij = C[i+j*lda];
       for (int k = 0; k < K; ++k)
-	cij += A[i+k*lda] * B[k+j*lda];
-      C[i+j*lda] = cij;
+        restrict double b1 = B[k+j*lda];
+        int jl = j*lda;
+        int kl = k*lda;
+        for (int i = 0; i < M; ++i)
+          {
+            restrict C[i+jl] += A[i+kl] * b1; 
+          }
     }
 }
 
