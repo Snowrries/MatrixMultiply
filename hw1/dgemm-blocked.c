@@ -58,10 +58,10 @@ static void do_block(int lda, int M, int N, int K, double* A, double* B, double*
 				bb3 = B[j*lda + k+2];
 				bb4 = B[j*lda + k+3];
 				for (; i < M; ++i) {				
-					C[lda*j + i] += A[lda*k + i] * b1;
-					C[lda*j + i] += A[lda*(k + 1) + i] * b1;
-					C[lda*j + i] += A[lda*(k + 2) + i] * b1;
-					C[lda*j + i] += A[lda*(k + 3) + i] * b1;
+					C[lda*j + i] += A[lda*k + i] * bb1;
+					C[lda*j + i] += A[lda*(k + 1) + i] * bb2;
+					C[lda*j + i] += A[lda*(k + 2) + i] * bb3;
+					C[lda*j + i] += A[lda*(k + 3) + i] * bb4;
 				}
 			}
 		}
