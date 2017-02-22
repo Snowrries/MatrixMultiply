@@ -75,10 +75,10 @@ static void do_block(int lda, int M, int N, int K, double* A, double* B, double*
 
 				c = _mm256_loadu_pd(&C[lda*(j+1) + i]);
 				temp = lda*k+i;
-				temp1 = _mm256_mul_pd(_mm256_loadu_pd(&A[temp]),b1);
-				temp2 = _mm256_mul_pd(_mm256_loadu_pd(&A[temp += lda]), b2);
-				temp3 = _mm256_mul_pd(_mm256_loadu_pd(&A[temp += lda]), b3);
-				temp4 = _mm256_mul_pd(_mm256_loadu_pd(&A[temp += lda]), b4);
+				temp1 = _mm256_mul_pd(_mm256_loadu_pd(&A[temp]),b5);
+				temp2 = _mm256_mul_pd(_mm256_loadu_pd(&A[temp += lda]), b6);
+				temp3 = _mm256_mul_pd(_mm256_loadu_pd(&A[temp += lda]), b7);
+				temp4 = _mm256_mul_pd(_mm256_loadu_pd(&A[temp += lda]), b8);
 
 				temp5 = _mm256_add_pd(temp1, temp2);
 
@@ -92,10 +92,10 @@ static void do_block(int lda, int M, int N, int K, double* A, double* B, double*
 
 				c = _mm256_loadu_pd(&C[lda*(j+2) + i]);
 				temp = lda*k+i;
-				temp1 = _mm256_mul_pd(_mm256_loadu_pd(&A[temp]),b1);
-				temp2 = _mm256_mul_pd(_mm256_loadu_pd(&A[temp += lda]), b2);
-				temp3 = _mm256_mul_pd(_mm256_loadu_pd(&A[temp += lda]), b3);
-				temp4 = _mm256_mul_pd(_mm256_loadu_pd(&A[temp += lda]), b4);
+				temp1 = _mm256_mul_pd(_mm256_loadu_pd(&A[temp]),b9);
+				temp2 = _mm256_mul_pd(_mm256_loadu_pd(&A[temp += lda]), b10);
+				temp3 = _mm256_mul_pd(_mm256_loadu_pd(&A[temp += lda]), b11);
+				temp4 = _mm256_mul_pd(_mm256_loadu_pd(&A[temp += lda]), b12);
 
 				temp5 = _mm256_add_pd(temp1, temp2);
 
@@ -109,10 +109,10 @@ static void do_block(int lda, int M, int N, int K, double* A, double* B, double*
 
 				c = _mm256_loadu_pd(&C[lda*(j+3) + i]);
 				temp = lda*k+i;
-				temp1 = _mm256_mul_pd(_mm256_loadu_pd(&A[temp]),b1);
-				temp2 = _mm256_mul_pd(_mm256_loadu_pd(&A[temp += lda]), b2);
-				temp3 = _mm256_mul_pd(_mm256_loadu_pd(&A[temp += lda]), b3);
-				temp4 = _mm256_mul_pd(_mm256_loadu_pd(&A[temp += lda]), b4);
+				temp1 = _mm256_mul_pd(_mm256_loadu_pd(&A[temp]),b13);
+				temp2 = _mm256_mul_pd(_mm256_loadu_pd(&A[temp += lda]), b14);
+				temp3 = _mm256_mul_pd(_mm256_loadu_pd(&A[temp += lda]), b15);
+				temp4 = _mm256_mul_pd(_mm256_loadu_pd(&A[temp += lda]), b16);
 
 				temp5 = _mm256_add_pd(temp1, temp2);
 
