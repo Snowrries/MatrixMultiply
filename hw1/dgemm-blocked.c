@@ -27,7 +27,7 @@ const char* dgemm_desc = "Simple blocked dgemm.";
 static void do_block(int lda, int M, int N, int K, double* A, double* B, double* C)
 {
 	double bb1, bb2, bb3, bb4, bb5, bb6, bb7, bb8, bb9, bb10, bb11, bb12, bb13, bb14, bb15, bb16;
-	int temp;
+	int temp, t1,t2,t3,t4;
 	__m256d b1, b2, b3, b4, c, temp1, temp2, temp3, temp4, temp5, temp6;
 	__m256d b5, b6, b7, b8, b9, b10, b11, b12, b13, b14, b15, b16;
 	int i, j, k;
@@ -57,69 +57,61 @@ static void do_block(int lda, int M, int N, int K, double* A, double* B, double*
 			b16 = _mm256_broadcast_sd (&B[ temp + 3]);
 			for (i = 0; i < (M - 3); i += 4) {
 				c = _mm256_loadu_pd(&C[lda*j + i]);
-				temp = lda*k+i;
-				temp1 = _mm256_mul_pd(_mm256_loadu_pd(&A[temp]),b1);
-				temp2 = _mm256_mul_pd(_mm256_loadu_pd(&A[temp += lda]), b2);
-				temp3 = _mm256_mul_pd(_mm256_loadu_pd(&A[temp += lda]), b3);
-				temp4 = _mm256_mul_pd(_mm256_loadu_pd(&A[temp += lda]), b4);
+				t1 = lda*k+i;
+				t2 = lda*(k+1)+i;
+				t3 = lda*(k+2)+i;
+				t4 = lda*(k+3)+i;
+				temp1 = _mm256_mul_pd(_mm256_loadu_pd(&A[t1]), b1);
+				temp2 = _mm256_mul_pd(_mm256_loadu_pd(&A[t2]), b2);
+				temp3 = _mm256_mul_pd(_mm256_loadu_pd(&A[t3]), b3);
+				temp4 = _mm256_mul_pd(_mm256_loadu_pd(&A[t4]), b4);
 
 				temp5 = _mm256_add_pd(temp1, temp2);
-
 				temp6 = _mm256_add_pd(temp3, temp4);
 
 				c = _mm256_add_pd(c, temp5);
-
 				c = _mm256_add_pd(c, temp6);
 
 				_mm256_storeu_pd(&C[lda*j + i],c);
 
 				c = _mm256_loadu_pd(&C[lda*(j+1) + i]);
-				temp = lda*k+i;
-				temp1 = _mm256_mul_pd(_mm256_loadu_pd(&A[temp]),b5);
-				temp2 = _mm256_mul_pd(_mm256_loadu_pd(&A[temp += lda]), b6);
-				temp3 = _mm256_mul_pd(_mm256_loadu_pd(&A[temp += lda]), b7);
-				temp4 = _mm256_mul_pd(_mm256_loadu_pd(&A[temp += lda]), b8);
+				temp1 = _mm256_mul_pd(_mm256_loadu_pd(&A[t1]), b5);
+				temp2 = _mm256_mul_pd(_mm256_loadu_pd(&A[t2]), b6);
+				temp3 = _mm256_mul_pd(_mm256_loadu_pd(&A[t3]), b7);
+				temp4 = _mm256_mul_pd(_mm256_loadu_pd(&A[t4]), b8);
 
 				temp5 = _mm256_add_pd(temp1, temp2);
-
 				temp6 = _mm256_add_pd(temp3, temp4);
 
 				c = _mm256_add_pd(c, temp5);
-
 				c = _mm256_add_pd(c, temp6);
 
 				_mm256_storeu_pd(&C[lda*(j+1) + i],c);
 
 				c = _mm256_loadu_pd(&C[lda*(j+2) + i]);
-				temp = lda*k+i;
-				temp1 = _mm256_mul_pd(_mm256_loadu_pd(&A[temp]),b9);
-				temp2 = _mm256_mul_pd(_mm256_loadu_pd(&A[temp += lda]), b10);
-				temp3 = _mm256_mul_pd(_mm256_loadu_pd(&A[temp += lda]), b11);
-				temp4 = _mm256_mul_pd(_mm256_loadu_pd(&A[temp += lda]), b12);
+				temp1 = _mm256_mul_pd(_mm256_loadu_pd(&A[t1]), b9);
+				temp2 = _mm256_mul_pd(_mm256_loadu_pd(&A[t2]), b10);
+				temp3 = _mm256_mul_pd(_mm256_loadu_pd(&A[t3]), b11);
+				temp4 = _mm256_mul_pd(_mm256_loadu_pd(&A[t4]), b12);
 
 				temp5 = _mm256_add_pd(temp1, temp2);
-
 				temp6 = _mm256_add_pd(temp3, temp4);
 
 				c = _mm256_add_pd(c, temp5);
-
 				c = _mm256_add_pd(c, temp6);
 
 				_mm256_storeu_pd(&C[lda*(j+2) + i],c);
 
 				c = _mm256_loadu_pd(&C[lda*(j+3) + i]);
-				temp = lda*k+i;
-				temp1 = _mm256_mul_pd(_mm256_loadu_pd(&A[temp]),b13);
-				temp2 = _mm256_mul_pd(_mm256_loadu_pd(&A[temp += lda]), b14);
-				temp3 = _mm256_mul_pd(_mm256_loadu_pd(&A[temp += lda]), b15);
-				temp4 = _mm256_mul_pd(_mm256_loadu_pd(&A[temp += lda]), b16);
+				temp1 = _mm256_mul_pd(_mm256_loadu_pd(&A[t1]), b13);
+				temp2 = _mm256_mul_pd(_mm256_loadu_pd(&A[t2]), b14);
+				temp3 = _mm256_mul_pd(_mm256_loadu_pd(&A[t3]), b15);
+				temp4 = _mm256_mul_pd(_mm256_loadu_pd(&A[t4]), b16);
 
 				temp5 = _mm256_add_pd(temp1, temp2);
-
 				temp6 = _mm256_add_pd(temp3, temp4);
 
 				c = _mm256_add_pd(c, temp5);
-
 				c = _mm256_add_pd(c, temp6);
 
 				_mm256_storeu_pd(&C[lda*(j+3) + i],c);
@@ -150,24 +142,24 @@ static void do_block(int lda, int M, int N, int K, double* A, double* B, double*
 					temp = lda*k+i;
 					int tempp = lda*j+i;
 					C[tempp] += A[temp] * bb1;
-					C[tempp] += A[temp+=lda] * bb2;
-					C[tempp] += A[temp+=lda] * bb3;
-					C[tempp] += A[temp+=lda] * bb4;
+					C[tempp] += A[temp+lda] * bb2;
+					C[tempp] += A[temp+(2*lda)] * bb3;
+					C[tempp] += A[temp+(3*lda)] * bb4;
 					tempp+= lda;
 					C[tempp] += A[temp] * bb5;
-					C[tempp] += A[temp+=lda] * bb6;
-					C[tempp] += A[temp+=lda] * bb7;
-					C[tempp] += A[temp+=lda] * bb8;
+					C[tempp] += A[temp+lda] * bb6;
+					C[tempp] += A[temp+(2*lda)] * bb7;
+					C[tempp] += A[temp+(3*lda)] * bb8;
 					tempp+= lda;
 					C[tempp] += A[temp] * bb9;
-					C[tempp] += A[temp+=lda] * bb10;
-					C[tempp] += A[temp+=lda] * bb11;
-					C[tempp] += A[temp+=lda] * bb12;
+					C[tempp] += A[temp+lda] * bb10;
+					C[tempp] += A[temp+(2*lda)] * bb11;
+					C[tempp] += A[temp+(3*lda)] * bb12;
 					tempp+= lda;
 					C[tempp] += A[temp] * bb13;
-					C[tempp] += A[temp+=lda] * bb14;
-					C[tempp] += A[temp+=lda] * bb15;
-					C[tempp] += A[temp+=lda] * bb16;
+					C[tempp] += A[temp+lda] * bb14;
+					C[tempp] += A[temp+(2*lda)] * bb15;
+					C[tempp] += A[temp+(3*lda)] * bb16;
 				}
 			}
 		}
@@ -175,14 +167,14 @@ static void do_block(int lda, int M, int N, int K, double* A, double* B, double*
 			do {
 				temp = lda*j + k; 
 				b1 = _mm256_broadcast_sd (&B[ temp ]);
-				b2 = _mm256_broadcast_sd (&B[ temp += lda]);
-				b3 = _mm256_broadcast_sd (&B[ temp += lda]);
-				b4 = _mm256_broadcast_sd (&B[ temp += lda]);
+				b2 = _mm256_broadcast_sd (&B[ temp+lda ]);
+				b3 = _mm256_broadcast_sd (&B[ temp+(2*lda)]);
+				b4 = _mm256_broadcast_sd (&B[ temp+(3*lda)]);
 
 				for (i = 0; i < (M - 3); i += 4) {
-					double* atp = &A[temp];
 					c = _mm256_loadu_pd(&C[lda*j + i]);
 					temp = lda*k+i;
+					double* atp = &A[temp];
 					temp1 = _mm256_mul_pd(_mm256_loadu_pd(atp),b1);
 					c = _mm256_add_pd(c, temp1);
 					_mm256_storeu_pd(&C[lda*j + i],c);
@@ -206,17 +198,17 @@ static void do_block(int lda, int M, int N, int K, double* A, double* B, double*
 				if(M % 4){
 					temp = j*lda+k;
 					bb1 = B[temp];
-					bb2 = B[temp+=lda];
-					bb3 = B[temp+=lda];
-					bb4 = B[temp+=lda];
+					bb2 = B[temp + lda];
+					bb3 = B[temp + 2*lda];
+					bb4 = B[temp + 3*lda];
 					for (; i < M; ++i) {
 						temp = lda*k+i;
 						double at = A[temp];
 						int tempp = lda*j+i;
 						C[tempp] += at * bb1;
-						C[tempp+= lda] += at * bb2;
-						C[tempp+= lda] += at * bb3;
-						C[tempp+= lda] += at * bb4;
+						C[tempp+ lda] += at * bb2;
+						C[tempp+ 2*lda] += at * bb3;
+						C[tempp+ 3*lda] += at * bb4;
 					}
 				}
 			} while (++k < K);
