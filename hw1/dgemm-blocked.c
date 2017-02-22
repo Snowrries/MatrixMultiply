@@ -26,41 +26,48 @@ const char* dgemm_desc = "Simple blocked dgemm.";
  * where C is M-by-N, A is M-by-K, and B is K-by-N. */
 static void do_block(int lda, int M, int N, int K, double* A, double* B, double* C)
 {
-	double b1;
-	__m256d b, c;
+	double bb1, bb2, bb3, bb4;
+	__m256d b1, b2, b3, b4, c;
 	int i, j, k;
 	//Expand j, k, then i. (Maybe have to alter, if this is column major? )
 	for (j = 0; j < N; ++j) {
 
 		for (k = 0; k < (K - 3); k += 4) {
 
-			b = _mm256_load_pd (&B[ lda*j + k]);
-
-
+			b1 = _mm256_broadcast_sd (&B[ lda*j + k]);
+			b2 = _mm256_broadcast_sd (&B[ lda*j + (k + 1)]);
+			b3 = _mm256_broadcast_sd (&B[ lda*j + (k + 2)]);
+			b4 = _mm256_broadcast_sd (&B[ lda*j + (k + 3)]);
 			for (i = 0; i < (M - 3); i += 4) {
-				c = _mm256_load_pd(&C[lda*j + i]);
+				c = _mm256_loadu_pd(&C[lda*j + i]);
 
-				c = _mm256_add_pd(c, _mm256_mul_pd(_mm256_load_pd(&A[lda*k + i]), b));
+				c = _mm256_add_pd(c, _mm256_mul_pd(_mm256_loadu_pd(&A[lda*k + i]), b1));
 
-				c = _mm256_add_pd(c, _mm256_mul_pd(_mm256_load_pd(&A[lda*(k + 1) + i]), b));
+				c = _mm256_add_pd(c, _mm256_mul_pd(_mm256_loadu_pd(&A[lda*(k + 1) + i]), b2));
 
-				c = _mm256_add_pd(c, _mm256_mul_pd(_mm256_load_pd(&A[lda*(k + 2) + i]), b));
+				c = _mm256_add_pd(c, _mm256_mul_pd(_mm256_loadu_pd(&A[lda*(k + 2) + i]), b3));
 
-				c = _mm256_add_pd(c, _mm256_mul_pd(_mm256_load_pd(&A[lda*(k + 3) + i]), b));
+				c = _mm256_add_pd(c, _mm256_mul_pd(_mm256_loadu_pd(&A[lda*(k + 3) + i]), b4));
 
-				_mm256_store_pd(&C[lda*j + i],c);
+				_mm256_storeu_pd(&C[lda*j + i],c);
 
 			}	
 			if(M % 4){
-				b1 = B[j*lda + k];
+				bb1 = B[j*lda + k];
+				bb2 = B[j*lda + k+1];
+				bb3 = B[j*lda + k+2];
+				bb4 = B[j*lda + k+3];
 				for (; i < M; ++i) {				
 					C[lda*j + i] += A[lda*k + i] * b1;
+					C[lda*j + i] += A[lda*(k + 1) + i] * b1;
+					C[lda*j + i] += A[lda*(k + 2) + i] * b1;
+					C[lda*j + i] += A[lda*(k + 3) + i] * b1;
 				}
 			}
 		}
 		if (K % 4) {
 			do {
-				b1 = B[j*lda + k];
+				bb1 = B[j*lda + k];
 				for (i = 0; i < (M - 3); i += 4) {
 					C[lda*j + i] += A[lda*k + i] * b1;
 					C[lda*j + (i+1)] += A[lda*k + (i+1)] * b1;
