@@ -34,7 +34,7 @@ static void do_block(int lda, int M, int N, int K, double* A, double* B, double*
 
 		for (k = 0; k < (K - 3); k += 4) {
 
-			b = _mm256_load_pd (B[ lda*i + k]);
+			b = _mm256_load_pd (&B[ lda*i + k]);
 
 
 			for (i = 0; i < (M - 3); i += 4) {
@@ -70,7 +70,7 @@ static void do_block(int lda, int M, int N, int K, double* A, double* B, double*
 			if(M % 4){
 				b = _mm256_load_pd (&B[ lda*i + k]);
 				for (; i < M; i ++) {				
-					c = _mm256_load_pd(C[lda*j + i]);
+					c = _mm256_load_pd(&C[lda*j + i]);
 					_mm256_store_pd(&C[lda*j + i],_mm256_add_pd(_mm256_mul_pd(_mm256_load_pd(&A[lda*k + i]),b),c));
 					_mm256_store_pd(&C[lda*j + i],_mm256_add_pd(_mm256_mul_pd(_mm256_load_pd(&A[lda*(k+1) + i]),b),c));
 					_mm256_store_pd(&C[lda*j + i],_mm256_add_pd(_mm256_mul_pd(_mm256_load_pd(&A[lda*(k+2) + i]),b),c));
