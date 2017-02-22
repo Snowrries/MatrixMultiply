@@ -69,14 +69,14 @@ static void do_block(int lda, int M, int N, int K, double* A, double* B, double*
 			do {
 				bb1 = B[j*lda + k];
 				for (i = 0; i < (M - 3); i += 4) {
-					C[lda*j + i] += A[lda*k + i] * b1;
-					C[lda*j + (i+1)] += A[lda*k + (i+1)] * b1;
-					C[lda*j + (i+2)] += A[lda*k + (i+2)] * b1;
-					C[lda*j + (i+3)] += A[lda*k + (i+3)] * b1;
+					C[lda*j + i] += A[lda*k + i] * bb1;
+					C[lda*j + (i+1)] += A[lda*k + (i+1)] * bb1;
+					C[lda*j + (i+2)] += A[lda*k + (i+2)] * bb1;
+					C[lda*j + (i+3)] += A[lda*k + (i+3)] * bb1;
 				}
 				if(M % 4){
 					for (; i < M; i ++) {				
-						C[lda*j + i] += A[lda*k + i] * b1;
+						C[lda*j + i] += A[lda*k + i] * bb1;
 					}
 				}
 			} while (++k < K);
