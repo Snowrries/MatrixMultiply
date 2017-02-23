@@ -22,10 +22,89 @@ const char* dgemm_desc = "Simple blocked dgemm.";
 #define min(a,b) (((a)<(b))?(a):(b))
 #define COMPUTATION_ARR(A,i,j) (A)[(j)*lda + (i)]
 
-
 /* This auxiliary subroutine performs a smaller dgemm operation
  *  C := C + A * B
- * where C is 4-by-4, A is 4-by-K, and B is K-by-4. */
+ * where C is M-by-N, A is M-by-K, and B is K-by-N. */
+ static inline void do_block (int lda, int M, int N, int K, double* A, double* B, double* C)
+ {
+   double buff_a[M*K], buff_b[K*N];
+   double *pointer_a, *pointer_b, *c;
+
+   const int maximum_n = N-3;
+   int maximum_m = M-3;
+   int edge_case1 = M%4;
+   int edge_case2 = N%4;
+
+   int i = 0, j = 0, p = 0;
+
+
+   for (j = 0 ; j < maximum_n; j += 4)
+   {
+     pointer_b = &buff_b[j*K];
+
+     b_elements_copy(lda, K, B + j*lda, pointer_b);
+
+     for (i = 0; i < maximum_m; i += 4) {
+       pointer_a = &buff_a[i*K];
+       if (j == 0) a_elements_copy(lda, K, A + i, pointer_a);
+       c = C + i + j*lda;
+      calc4_t(lda, K, pointer_a, pointer_b, c);
+     }
+   }
+
+   if (edge_case1 != 0)
+   {
+     for ( ; i < M; ++i)
+       for (p = 0; p < N; ++p)
+       {
+         double c_ip = COMPUTATION_ARR(C,i,p);
+         for (int k = 0; k < K; ++k)
+           c_ip += COMPUTATION_ARR(A,i,k) * COMPUTATION_ARR(B,k,p);
+         COMPUTATION_ARR(C,i,p) = c_ip;
+       }
+   }
+   if (edge_case2 != 0)
+   {
+     maximum_m = M - edge_case1;
+     for ( ; j < N; ++j)
+       for (i = 0; i < maximum_m; ++i)
+       {
+         double cij = COMPUTATION_ARR(C,i,j);
+         for (int k = 0; k < K; ++k)
+           cij += COMPUTATION_ARR(A,i,k) * COMPUTATION_ARR(B,k,j);
+         COMPUTATION_ARR(C,i,j) = cij;
+       }
+   }
+ }
+
+ static inline void a_elements_copy (int lda, const int K, double* a_src, double* a_dest) {
+
+  for (int i = 0; i < K; ++i)
+  {
+    *a_dest++ = *a_src;
+    *a_dest++ = *(a_src+1);
+    *a_dest++ = *(a_src+2);
+    *a_dest++ = *(a_src+3);
+    a_src += lda;
+  }
+}
+
+static inline void b_elements_copy (int lda, const int K, double* b_src, double* b_dest) {
+  double *pointer_b0, *pointer_b1, *pointer_b2, *pointer_b3;
+  pointer_b0 = b_src;
+  pointer_b1 = pointer_b0 + lda;
+  pointer_b2 = pointer_b1 + lda;
+  pointer_b3 = pointer_b2 + lda;
+
+  for (int i = 0; i < K; ++i)
+  {
+    *b_dest++ = *pointer_b0++;
+    *b_dest++ = *pointer_b1++;
+    *b_dest++ = *pointer_b2++;
+    *b_dest++ = *pointer_b3++;
+  }
+}
+
 static inline calc4_nt(int lda, int i, int j, int K, double* A, double* B, double* C){
 	int temp;
 	__m256d b1, b2, b3, b4, temp1
@@ -36,7 +115,7 @@ static inline calc4_nt(int lda, int i, int j, int K, double* A, double* B, doubl
 	c4 = _mm256_load_pd(&C[lda*(j+3) + i]);
 
 	for(int k = 0; k < K; ++k){
-		temp = lda*j + k; 
+		temp = lda*j + k;
 		b1 = _mm256_broadcast_sd (&B[ temp ]);
 		b2 = _mm256_broadcast_sd (&B[ temp+lda ]);
 		b3 = _mm256_broadcast_sd (&B[ temp+(2*lda)]);
@@ -92,90 +171,6 @@ static inline calc4_t(int lda, int i, int j, int K, double* a, double* b, double
 	_mm256_store_pd(cp2,c2);
 	_mm256_store_pd(cp3,c3);
 	_mm256_store_pd(cp4,c4);
-}
-
-
-/* This auxiliary subroutine performs a smaller dgemm operation
- *  C := C + A * B
- * where C is M-by-N, A is M-by-K, and B is K-by-N. */
- static inline void do_block (int lda, int M, int N, int K, double* A, double* B, double* C)
- {
-   double buff_a[M*K], buff_b[K*N];
-   double *pointer_a, *pointer_b, *c;
-
-   const int maximum_n = N-3;
-   int maximum_m = M-3;
-   int edge_case1 = M%4;
-   int edge_case2 = N%4;
-
-   int i = 0, j = 0, p = 0;
-
-
-   for (j = 0 ; j < maximum_n; j += 4)
-   {
-     pointer_b = &buff_b[j*K];
-
-     copy_b(lda, K, B + j*lda, pointer_b);
-
-     for (i = 0; i < maximum_m; i += 4) {
-       pointer_a = &buff_a[i*K];
-       if (j == 0) copy_a(lda, K, A + i, pointer_a);
-       c = C + i + j*lda;
-      calc_4x4(lda, K, pointer_a, pointer_b, c);
-     }
-   }
-
-   if (edge_case1 != 0)
-   {
-     for ( ; i < M; ++i)
-       for (p = 0; p < N; ++p)
-       {
-         double c_ip = COMPUTATION_ARR(C,i,p);
-         for (int k = 0; k < K; ++k)
-           c_ip += COMPUTATION_ARR(A,i,k) * COMPUTATION_ARR(B,k,p);
-         COMPUTATION_ARR(C,i,p) = c_ip;
-       }
-   }
-   if (edge_case2 != 0)
-   {
-     maximum_m = M - edge_case1;
-     for ( ; j < N; ++j)
-       for (i = 0; i < maximum_m; ++i)
-       {
-         double cij = COMPUTATION_ARR(C,i,j);
-         for (int k = 0; k < K; ++k)
-           cij += COMPUTATION_ARR(A,i,k) * COMPUTATION_ARR(B,k,j);
-         COMPUTATION_ARR(C,i,j) = cij;
-       }
-   }
- }
-
- static inline void copy_a (int lda, const int K, double* a_src, double* a_dest) {
-  /* For each 4xK block-row of A */
-  for (int i = 0; i < K; ++i)
-  {
-    *a_dest++ = *a_src;
-    *a_dest++ = *(a_src+1);
-    *a_dest++ = *(a_src+2);
-    *a_dest++ = *(a_src+3);
-    a_src += lda;
-  }
-}
-
-static inline void copy_b (int lda, const int K, double* b_src, double* b_dest) {
-  double *pointer_b0, *pointer_b1, *pointer_b2, *pointer_b3;
-  pointer_b0 = b_src;
-  pointer_b1 = pointer_b0 + lda;
-  pointer_b2 = pointer_b1 + lda;
-  pointer_b3 = pointer_b2 + lda;
-
-  for (int i = 0; i < K; ++i)
-  {
-    *b_dest++ = *pointer_b0++;
-    *b_dest++ = *pointer_b1++;
-    *b_dest++ = *pointer_b2++;
-    *b_dest++ = *pointer_b3++;
-  }
 }
 
 /* This routine performs a dgemm operation
