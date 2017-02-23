@@ -22,9 +22,107 @@ const char* dgemm_desc = "Simple blocked dgemm.";
 #define min(a,b) (((a)<(b))?(a):(b))
 #define COMPUTATION_ARR(A,i,j) (A)[(j)*lda + (i)]
 
+static inline calc4_nt(int lda, int i, int j, int K, double* A, double* B, double* C){
+	int temp;
+	__m256d b1, b2, b3, b4, temp1, c1, c2, c3, c4, a1;
+	c1 = _mm256_load_pd(&C[lda*j + i]);
+	c2 = _mm256_load_pd(&C[lda*(j+1) + i]);
+	c3 = _mm256_load_pd(&C[lda*(j+2) + i]);
+	c4 = _mm256_load_pd(&C[lda*(j+3) + i]);
+
+	for(int k = 0; k < K; ++k){
+		temp = lda*j + k;
+		b1 = _mm256_broadcast_sd (&B[ temp ]);
+		b2 = _mm256_broadcast_sd (&B[ temp+lda ]);
+		b3 = _mm256_broadcast_sd (&B[ temp+(2*lda)]);
+		b4 = _mm256_broadcast_sd (&B[ temp+(3*lda)]);
+
+		temp = lda*k+i;
+		a1 = _mm256_load_pd( &A[temp]);
+
+		c1 = _mm256_add_pd(c1, _mm256_mul_pd(a1,b1));
+		c2 = _mm256_add_pd(c2, _mm256_mul_pd(a1,b2));
+		c3 = _mm256_add_pd(c3, _mm256_mul_pd(a1,b3));
+		c4 = _mm256_add_pd(c4, _mm256_mul_pd(a1,b4));
+
+	}
+	_mm256_store_pd(&C[lda*j + i],c1);
+	_mm256_store_pd(&C[lda*(j+1) + i],c2);
+	_mm256_store_pd(&C[lda*(j+2) + i],c3);
+	_mm256_store_pd(&C[lda*(j+3) + i],c4);
+}
+
+static inline calc4_t(int lda, int i, int j, int K, double* a, double* b, double* c){
+	int temp;
+	__m256d b1, b2, b3, b4, temp1
+	c1, c2, c3, c4, a1;
+	double* cp2;
+	double* cp3;
+	double* cp4;
+	cp2 = c + lda;
+	cp3 = cp2 + lda;
+	cp4 = cp3 + lda;
+
+
+	c1 = _mm256_load_pd(c);
+	c2 = _mm256_load_pd(cp2);
+	c3 = _mm256_load_pd(cp3);
+	c4 = _mm256_load_pd(cp4);
+
+	for(int k = 0; k < K; ++k){
+
+		b1 = _mm256_broadcast_sd (b++);
+		b2 = _mm256_broadcast_sd (b++);
+		b3 = _mm256_broadcast_sd (b++);
+		b4 = _mm256_broadcast_sd (b++);
+
+		a1 = _mm256_load_pd(a);
+		a+= 4;
+
+		c1 = _mm256_add_pd(c1, _mm256_mul_pd(a1,b1));
+		c2 = _mm256_add_pd(c2, _mm256_mul_pd(a1,b2));
+		c3 = _mm256_add_pd(c3, _mm256_mul_pd(a1,b3));
+		c4 = _mm256_add_pd(c4, _mm256_mul_pd(a1,b4));
+
+	}
+	_mm256_store_pd(c,c1);
+	_mm256_store_pd(cp2,c2);
+	_mm256_store_pd(cp3,c3);
+	_mm256_store_pd(cp4,c4);
+}
+
+ static inline void a_elements_copy (int lda, const int K, double* a_src, double* a_dest) {
+
+  for (int i = 0; i < K; ++i)
+  {
+    *a_dest++ = *a_src;
+    *a_dest++ = *(a_src+1);
+    *a_dest++ = *(a_src+2);
+    *a_dest++ = *(a_src+3);
+    a_src += lda;
+  }
+}
+
+static inline void b_elements_copy (int lda, const int K, double* b_src, double* b_dest) {
+  double *pointer_b0, *pointer_b1, *pointer_b2, *pointer_b3;
+  pointer_b0 = b_src;
+  pointer_b1 = pointer_b0 + lda;
+  pointer_b2 = pointer_b1 + lda;
+  pointer_b3 = pointer_b2 + lda;
+
+  for (int i = 0; i < K; ++i)
+  {
+    *b_dest++ = *pointer_b0++;
+    *b_dest++ = *pointer_b1++;
+    *b_dest++ = *pointer_b2++;
+    *b_dest++ = *pointer_b3++;
+  }
+}
+
 /* This auxiliary subroutine performs a smaller dgemm operation
  *  C := C + A * B
  * where C is M-by-N, A is M-by-K, and B is K-by-N. */
+
  static inline void do_block (int lda, int M, int N, int K, double* A, double* B, double* C)
  {
    double buff_a[M*K], buff_b[K*N];
@@ -76,102 +174,6 @@ const char* dgemm_desc = "Simple blocked dgemm.";
        }
    }
  }
-
- static inline void a_elements_copy (int lda, const int K, double* a_src, double* a_dest) {
-
-  for (int i = 0; i < K; ++i)
-  {
-    *a_dest++ = *a_src;
-    *a_dest++ = *(a_src+1);
-    *a_dest++ = *(a_src+2);
-    *a_dest++ = *(a_src+3);
-    a_src += lda;
-  }
-}
-
-static inline void b_elements_copy (int lda, const int K, double* b_src, double* b_dest) {
-  double *pointer_b0, *pointer_b1, *pointer_b2, *pointer_b3;
-  pointer_b0 = b_src;
-  pointer_b1 = pointer_b0 + lda;
-  pointer_b2 = pointer_b1 + lda;
-  pointer_b3 = pointer_b2 + lda;
-
-  for (int i = 0; i < K; ++i)
-  {
-    *b_dest++ = *pointer_b0++;
-    *b_dest++ = *pointer_b1++;
-    *b_dest++ = *pointer_b2++;
-    *b_dest++ = *pointer_b3++;
-  }
-}
-
-static inline calc4_nt(int lda, int i, int j, int K, double* A, double* B, double* C){
-	int temp;
-	__m256d b1, b2, b3, b4, temp1
-	c1, c2, c3, c4, a1;
-	c1 = _mm256_load_pd(&C[lda*j + i]);
-	c2 = _mm256_load_pd(&C[lda*(j+1) + i]);
-	c3 = _mm256_load_pd(&C[lda*(j+2) + i]);
-	c4 = _mm256_load_pd(&C[lda*(j+3) + i]);
-
-	for(int k = 0; k < K; ++k){
-		temp = lda*j + k;
-		b1 = _mm256_broadcast_sd (&B[ temp ]);
-		b2 = _mm256_broadcast_sd (&B[ temp+lda ]);
-		b3 = _mm256_broadcast_sd (&B[ temp+(2*lda)]);
-		b4 = _mm256_broadcast_sd (&B[ temp+(3*lda)]);
-
-		temp = lda*k+i;
-		a1 = _mm256_load_pd( &A[temp]);
-
-		c1 = _mm256_add_pd(c1, _mm256_mul_pd(a1,b1));
-		c2 = _mm256_add_pd(c2, _mm256_mul_pd(a1,b2));
-		c3 = _mm256_add_pd(c3, _mm256_mul_pd(a1,b3));
-		c4 = _mm256_add_pd(c4, _mm256_mul_pd(a1,b4));
-
-	}
-	_mm256_store_pd(&C[lda*j + i],c1);
-	_mm256_store_pd(&C[lda*(j+1) + i],c2);
-	_mm256_store_pd(&C[lda*(j+2) + i],c3);
-	_mm256_store_pd(&C[lda*(j+3) + i],c4);
-}
-
-static inline calc4_t(int lda, int i, int j, int K, double* a, double* b, double* c){
-	int temp;
-	__m256d b1, b2, b3, b4, temp1
-	c1, c2, c3, c4, a1;
-	double* cp2,cp3,cp4;
-	cp2 = c + lda;
-	cp3 = cp2 + lda;
-	cp4 = cp3 + lda;
-
-
-	c1 = _mm256_load_pd(c);
-	c2 = _mm256_load_pd(cp2);
-	c3 = _mm256_load_pd(cp3);
-	c4 = _mm256_load_pd(cp4);
-
-	for(int k = 0; k < K; ++k){
-
-		b1 = _mm256_broadcast_sd (b++);
-		b2 = _mm256_broadcast_sd (b++);
-		b3 = _mm256_broadcast_sd (b++);
-		b4 = _mm256_broadcast_sd (b++);
-
-		a1 = _mm256_load_pd(a);
-		a+= 4;
-
-		c1 = _mm256_add_pd(c1, _mm256_mul_pd(a1,b1));
-		c2 = _mm256_add_pd(c2, _mm256_mul_pd(a1,b2));
-		c3 = _mm256_add_pd(c3, _mm256_mul_pd(a1,b3));
-		c4 = _mm256_add_pd(c4, _mm256_mul_pd(a1,b4));
-
-	}
-	_mm256_store_pd(c,c1);
-	_mm256_store_pd(cp2,c2);
-	_mm256_store_pd(cp3,c3);
-	_mm256_store_pd(cp4,c4);
-}
 
 /* This routine performs a dgemm operation
  *  C := C + A * B
