@@ -56,7 +56,7 @@ static inline calc8x4_t(int lda, int K, double* a, double* b, double* c){
 	int temp;
 	__m256d b1, b2, b3, b4, temp1,
 	c1, c2, c3, c4, c5, c6, c7, c8, a1, a2;
-	double* cp2,cp3,cp4,cp5,cp6,cp7,cp8;
+	double* cp2,*cp3,*cp4,*cp5,*cp6,*cp7,*cp8;
 	cp2 = c + lda;
 	cp3 = cp2 + lda;
 	cp4 = cp3 + lda;
