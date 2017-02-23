@@ -60,10 +60,10 @@ static inline calc8x4_t(int lda, int K, double* a, double* b, double* c){
 	cp2 = c + lda;
 	cp3 = cp2 + lda;
 	cp4 = cp3 + lda;
-	cp5 = cp4 + lda;
-	cp6 = cp5 + lda;
-	cp7 = cp6 + lda;
-	cp8 = cp7 + lda;
+	cp5 = c + 4;
+	cp6 = cp2 + 4;
+	cp7 = cp3 + 4;
+	cp8 = cp4 + 4;
 
 	c1 = _mm256_load_pd(c);
 	c2 = _mm256_load_pd(cp2);
