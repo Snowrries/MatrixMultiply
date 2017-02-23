@@ -1,4 +1,4 @@
-L2_BLOCK_SIZE/*
+/*
     Please include compiler name below (you may also include any other modules you would like to be loaded)
 
 COMPILER= gnu
