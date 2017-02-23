@@ -21,6 +21,79 @@ const char* dgemm_desc = "Simple blocked dgemm.";
 
 #define min(a,b) (((a)<(b))?(a):(b))
 
+
+/* This auxiliary subroutine performs a smaller dgemm operation
+ *  C := C + A * B
+ * where C is 4-by-4, A is 4-by-K, and B is K-by-4. */
+static inline calc4_nt(int lda, int i, int j, int K, double* A, double* B, double* C){
+	int temp;
+	__m256d b1, b2, b3, b4, temp1
+	c1, c2, c3, c4, a1;
+	c1 = _mm256_load_pd(&C[lda*j + i]);
+	c2 = _mm256_load_pd(&C[lda*(j+1) + i]);
+	c3 = _mm256_load_pd(&C[lda*(j+2) + i]);
+	c4 = _mm256_load_pd(&C[lda*(j+3) + i]);
+
+	for(int k = 0; k < K; ++k){
+		temp = lda*j + k; 
+		b1 = _mm256_broadcast_sd (&B[ temp ]);
+		b2 = _mm256_broadcast_sd (&B[ temp+lda ]);
+		b3 = _mm256_broadcast_sd (&B[ temp+(2*lda)]);
+		b4 = _mm256_broadcast_sd (&B[ temp+(3*lda)]);
+
+		temp = lda*k+i;
+		a1 = _mm256_load_pd( &A[temp]);
+
+		c1 = _mm256_add_pd(c1, _mm256_mul_pd(a1,b1));
+		c2 = _mm256_add_pd(c2, _mm256_mul_pd(a1,b2));
+		c3 = _mm256_add_pd(c3, _mm256_mul_pd(a1,b3));
+		c4 = _mm256_add_pd(c4, _mm256_mul_pd(a1,b4));
+
+	}
+	_mm256_store_pd(&C[lda*j + i],c1);
+	_mm256_store_pd(&C[lda*(j+1) + i],c2);
+	_mm256_store_pd(&C[lda*(j+2) + i],c3);
+	_mm256_store_pd(&C[lda*(j+3) + i],c4);
+}
+
+static inline calc4_t(int lda, int i, int j, int K, double* a, double* b, double* c){
+	int temp;
+	__m256d b1, b2, b3, b4, temp1
+	c1, c2, c3, c4, a1;
+	double* cp2,cp3,cp4;
+	cp2 = c + lda;
+	cp3 = cp2 + lda;
+	cp4 = cp3 + lda;
+
+
+	c1 = _mm256_load_pd(c);
+	c2 = _mm256_load_pd(cp2);
+	c3 = _mm256_load_pd(cp3);
+	c4 = _mm256_load_pd(cp4);
+
+	for(int k = 0; k < K; ++k){
+
+		b1 = _mm256_broadcast_sd (b++);
+		b2 = _mm256_broadcast_sd (b++);
+		b3 = _mm256_broadcast_sd (b++);
+		b4 = _mm256_broadcast_sd (b++);
+
+		a1 = _mm256_load_pd(a);
+		a+= 4;
+
+		c1 = _mm256_add_pd(c1, _mm256_mul_pd(a1,b1));
+		c2 = _mm256_add_pd(c2, _mm256_mul_pd(a1,b2));
+		c3 = _mm256_add_pd(c3, _mm256_mul_pd(a1,b3));
+		c4 = _mm256_add_pd(c4, _mm256_mul_pd(a1,b4));
+
+	}
+	_mm256_store_pd(c,c1);
+	_mm256_store_pd(cp2,c2);
+	_mm256_store_pd(cp3,c3);
+	_mm256_store_pd(cp4,c4);
+}
+
+
 /* This auxiliary subroutine performs a smaller dgemm operation
  *  C := C + A * B
  * where C is M-by-N, A is M-by-K, and B is K-by-N. */
