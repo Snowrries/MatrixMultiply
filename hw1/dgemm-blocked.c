@@ -152,6 +152,10 @@ static inline calc4_t(int lda, int K, double* a, double* b, double* c){
     *a_dest++ = *(a_src+1);
     *a_dest++ = *(a_src+2);
     *a_dest++ = *(a_src+3);
+    *a_dest++ = *(a_src+4);
+    *a_dest++ = *(a_src+5);
+    *a_dest++ = *(a_src+6);
+    *a_dest++ = *(a_src+7);
     a_src += lda;
   }
 }
@@ -199,7 +203,7 @@ static inline void b_elements_copy (int lda, const int K, double* b_src, double*
        pointer_a = &buff_a[i*K];
        if (j == 0) a_elements_copy(lda, K, A + i, pointer_a);
        c = C + i + j*lda;
-      calc4_t(lda, K, pointer_a, pointer_b, c);
+      calc8x4_t(lda, K, pointer_a, pointer_b, c);
      }
    }
 
