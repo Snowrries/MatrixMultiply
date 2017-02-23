@@ -1,10 +1,10 @@
-/* 
+/*
     Please include compiler name below (you may also include any other modules you would like to be loaded)
 
 COMPILER= gnu
 
     Please include All compiler flags and libraries as you want them run. You can simply copy this over from the Makefile's first few lines
- 
+
 CC = cc
 OPT = -O3
 CFLAGS = -Wall -std=gnu99 $(OPT)
@@ -15,9 +15,9 @@ LDLIBS = -lrt -Wl,--start-group $(MKLROOT)/lib/intel64/libmkl_intel_lp64.a $(MKL
 #include "immintrin.h"
 const char* dgemm_desc = "Simple blocked dgemm.";
 
-#if !defined(BLOCK_SIZE)
-#define BLOCK_SIZE 64
-#endif
+
+#define BLOCK_L1 256
+#define BLOCK_L2 512
 
 #define min(a,b) (((a)<(b))?(a):(b))
 
@@ -35,7 +35,7 @@ static void do_block(int lda, int M, int N, int K, double* A, double* B, double*
 	for (j = 0; j < N-3 ; j+=4 ) {
 
 		for (k = 0; k < (K - 3); k += 4) {
-			temp = lda*j + k; 
+			temp = lda*j + k;
 			b1 = _mm256_broadcast_sd (&B[ temp ]);
 			b2 = _mm256_broadcast_sd (&B[ temp + 1]);
 			b3 = _mm256_broadcast_sd (&B[ temp + 2]);
@@ -116,7 +116,7 @@ static void do_block(int lda, int M, int N, int K, double* A, double* B, double*
 
 				_mm256_store_pd(&C[lda*(j+3) + i],c);
 
-			}	
+			}
 			if(M % 4){
 				temp = j*lda+k;
 				bb1 = B[temp];
@@ -165,7 +165,7 @@ static void do_block(int lda, int M, int N, int K, double* A, double* B, double*
 		}
 		if (K % 4) {
 			do {
-				temp = lda*j + k; 
+				temp = lda*j + k;
 				b1 = _mm256_broadcast_sd (&B[ temp ]);
 				b2 = _mm256_broadcast_sd (&B[ temp+lda ]);
 				b3 = _mm256_broadcast_sd (&B[ temp+(2*lda)]);
@@ -216,7 +216,7 @@ static void do_block(int lda, int M, int N, int K, double* A, double* B, double*
 					c = _mm256_add_pd(c, temp1);
 					_mm256_store_pd(&C[lda*(j+3) + i+4],c);
 
-				}	
+				}
 				if(M % 8){
 					temp = j*lda+k;
 					bb1 = B[temp];
@@ -239,7 +239,7 @@ static void do_block(int lda, int M, int N, int K, double* A, double* B, double*
 	if( N % 4){
 		do{
 			for (k = 0; k < (K - 3); k += 4) {
-				temp = lda*j + k; 
+				temp = lda*j + k;
 				b1 = _mm256_broadcast_sd (&B[ temp ]);
 				b2 = _mm256_broadcast_sd (&B[ temp + 1]);
 				b3 = _mm256_broadcast_sd (&B[ temp + 2]);
@@ -262,7 +262,7 @@ static void do_block(int lda, int M, int N, int K, double* A, double* B, double*
 
 					_mm256_store_pd(&C[lda*j + i],c);
 
-				}	
+				}
 				if(M % 4){
 					temp = j*lda+k;
 					bb1 = B[temp];
@@ -288,7 +288,7 @@ static void do_block(int lda, int M, int N, int K, double* A, double* B, double*
 					}
 					if(M % 4){
 						bb1 = B[j*lda + k];
-						for (; i < M; ++i) {				
+						for (; i < M; ++i) {
 							C[lda*j + i] += A[lda*k + i] * bb1;
 						}
 					}
@@ -300,23 +300,38 @@ static void do_block(int lda, int M, int N, int K, double* A, double* B, double*
 
 /* This routine performs a dgemm operation
  *  C := C + A * B
- * where A, B, and C are lda-by-lda matrices stored in column-major format. 
- * On exit, A and B maintain their input values. */  
-void square_dgemm(int lda, double* A, double* B, double* C)
-{
-	/* For each block-row of A */
-	for (int i = 0; i < lda; i += BLOCK_SIZE)
-		/* For each block-column of B */
-		for (int j = 0; j < lda; j += BLOCK_SIZE)
-			/* Accumulate block dgemms into block of C */
-			for (int k = 0; k < lda; k += BLOCK_SIZE)
-			{
-				/* Correct block dimensions if block "goes off edge of" the matrix */
-				int M = min(BLOCK_SIZE, lda - i);
-				int N = min(BLOCK_SIZE, lda - j);
-				int K = min(BLOCK_SIZE, lda - k);
+ * where A, B, and C are lda-by-lda matrices stored in column-major format.
+ * On exit, A and B maintain their input values. */
+ void square_dgemm (int lda, double* A, double* B, double* C)
+ {
+   for (int t = 0; t < lda; t += BLOCK_L2)
+   {
+     int end_k = t + min(BLOCK_L2, lda-t);
 
-				/* Perform individual block dgemm */
-				do_block(lda, M, N, K, A + i + k*lda, B + k + j*lda, C + i + j*lda);
-			}
-}
+     for (int s = 0; s < lda; s += BLOCK_L2)
+     {
+       int end_j = s + min(BLOCK_L2, lda-s);
+
+       for (int r = 0; r < lda; r += BLOCK_L2)
+       {
+         int end_i = r + min(BLOCK_L2, lda-r);
+         for (int k = t; k < end_k; k += BLOCK_L1)
+         {
+           int K = min(BLOCK_L1, end_k-k);
+
+           for (int j = s; j < end_j; j += BLOCK_L1)
+           {
+             int N = min(BLOCK_L1, end_j-j);
+
+             for (int i = r; i < end_i; i += BLOCK_L1)
+             {
+               int M = min(BLOCK_L1, end_i-i);
+
+               do_block(lda, M, N, K, A + i + k*lda, B + k + j*lda, C + i + j*lda);
+             }
+           }
+         }
+       }
+     }
+   }
+ }
