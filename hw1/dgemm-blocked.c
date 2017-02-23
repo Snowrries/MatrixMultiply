@@ -52,10 +52,9 @@ static inline calc4_nt(int lda, int i, int j, int K, double* A, double* B, doubl
 	_mm256_store_pd(&C[lda*(j+3) + i],c4);
 }
 
-static inline calc4_t(int lda, int i, int j, int K, double* a, double* b, double* c){
+static inline calc4_t(int lda, int K, double* a, double* b, double* c){
 	int temp;
-	__m256d b1, b2, b3, b4, temp1
-	c1, c2, c3, c4, a1;
+	__m256d b1, b2, b3, b4, temp1, c1, c2, c3, c4, a1;
 	double* cp2;
 	double* cp3;
 	double* cp4;
