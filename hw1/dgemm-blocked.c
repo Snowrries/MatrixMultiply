@@ -52,6 +52,60 @@ static inline calc4_nt(int lda, int i, int j, int K, double* A, double* B, doubl
 	_mm256_store_pd(&C[lda*(j+3) + i],c4);
 }
 
+static inline calc8x4_t(int lda, int K, double* a, double* b, double* c){
+	int temp;
+	__m256d b1, b2, b3, b4, temp1,
+	c1, c2, c3, c4, c5, c6, c7, c8, a1, a2;
+	double* cp2,cp3,cp4,cp5,cp6,cp7,cp8;
+	cp2 = c + lda;
+	cp3 = cp2 + lda;
+	cp4 = cp3 + lda;
+	cp5 = cp4 + lda;
+	cp6 = cp5 + lda;
+	cp7 = cp6 + lda;
+	cp8 = cp7 + lda;
+
+	c1 = _mm256_load_pd(c);
+	c2 = _mm256_load_pd(cp2);
+	c3 = _mm256_load_pd(cp3);
+	c4 = _mm256_load_pd(cp4);
+	c5 = _mm256_load_pd(cp5);
+	c6 = _mm256_load_pd(cp6);
+	c7 = _mm256_load_pd(cp7);
+	c8 = _mm256_load_pd(cp8);
+
+	for(int k = 0; k < K; ++k){
+
+		b1 = _mm256_broadcast_sd (b++);
+		b2 = _mm256_broadcast_sd (b++);
+		b3 = _mm256_broadcast_sd (b++);
+		b4 = _mm256_broadcast_sd (b++);
+
+		a1 = _mm256_load_pd(a);
+		a+= 4;
+		a2 = _mm256_load_pd(a);
+		a+= 4;
+
+		c1 = _mm256_add_pd(c1, _mm256_mul_pd(a1,b1));
+		c2 = _mm256_add_pd(c2, _mm256_mul_pd(a1,b2));
+		c3 = _mm256_add_pd(c3, _mm256_mul_pd(a1,b3));
+		c4 = _mm256_add_pd(c4, _mm256_mul_pd(a1,b4));
+		c5 = _mm256_add_pd(c5, _mm256_mul_pd(a2,b1));
+		c6 = _mm256_add_pd(c6, _mm256_mul_pd(a2,b2));
+		c7 = _mm256_add_pd(c7, _mm256_mul_pd(a2,b3));
+		c8 = _mm256_add_pd(c8, _mm256_mul_pd(a2,b4));
+
+	}
+	_mm256_store_pd(c,c1);
+	_mm256_store_pd(cp2,c2);
+	_mm256_store_pd(cp3,c3);
+	_mm256_store_pd(cp4,c4);
+	_mm256_store_pd(cp5,c5);
+	_mm256_store_pd(cp6,c6);
+	_mm256_store_pd(cp7,c7);
+	_mm256_store_pd(cp8,c8);
+}
+
 static inline calc4_t(int lda, int K, double* a, double* b, double* c){
 	int temp;
 	__m256d b1, b2, b3, b4, temp1, c1, c2, c3, c4, a1;
