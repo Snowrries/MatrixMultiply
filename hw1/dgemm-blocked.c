@@ -128,8 +128,8 @@ static inline void b_elements_copy (int lda, const int K, double* b_src, double*
    double *pointer_a, *pointer_b, *c;
 
    const int maximum_n = N-3;
-   int maximum_m = M-3;
-   int edge_case1 = M%4;
+   int maximum_m = M-7;
+   int edge_case1 = M%8;
    int edge_case2 = N%4;
 
    int i = 0, j = 0, p = 0;
@@ -141,7 +141,7 @@ static inline void b_elements_copy (int lda, const int K, double* b_src, double*
 
      b_elements_copy(lda, K, B + j*lda, pointer_b);
 
-     for (i = 0; i < maximum_m; i += 4) {
+     for (i = 0; i < maximum_m; i += 8) {
        pointer_a = &buff_a[i*K];
        if (j == 0) a_elements_copy(lda, K, A + i, pointer_a);
        c = C + i + j*lda;
